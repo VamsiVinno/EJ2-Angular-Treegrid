@@ -1,10 +1,27 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, ViewChild } from '@angular/core';
+import { VirtualScrollService, TreeGridComponent } from '@syncfusion/ej2-angular-treegrid';
+import { dataSource, virtualData } from './data';
+// import { dataSource, virtualData } from './datasource';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  template: `<ejs-treegrid #treegrid [dataSource]='data' [enableVirtualization]='true' height='291' childMapping='Crew' [treeColumnIndex]='1' >
+  <e-columns>
+      <e-column field='TaskID' headerText='Player Jersey' width='120' textAlign='Right'></e-column>
+      <e-column field='FIELD1' headerText='Player Name' width='120'></e-column>
+      <e-column field='FIELD2' headerText='Year' width='100' textAlign='Right'></e-column>
+      <e-column field='FIELD3' headerText='Stint' width='120' textAlign='Right'></e-column>
+      <e-column field='FIELD4' headerText='TMID' width='120' textAlign='Right'></e-column>
+  </e-columns>
+</ejs-treegrid>`,
+  providers: [VirtualScrollService]
 })
-export class AppComponent {
-  title = 'treegrid';
+export class AppComponent implements OnInit {
+
+  public data: Object[] | undefined;
+
+  ngOnInit(): void {
+    dataSource();
+    this.data = virtualData;
+  }
 }
