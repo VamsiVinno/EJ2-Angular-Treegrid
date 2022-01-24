@@ -14,52 +14,115 @@
   [selectionSettings]="selectOptions"
   [editSettings]="editSettings"
   (rowDragStart)="onDrag($event)"
-  [contextMenuItems]='contextMenuItems'
-  (contextMenuClick)='contextMenuClick($event)'
+  [contextMenuItems]="contextMenuItems"
+  (contextMenuClick)="contextMenuClick($event)"
   (contextMenuOpen)="contextMenuOpen($event)"
   #grid
-  >
+>
   <e-columns>
     <e-column
-      field="TaskID"
-      headerText="Player Jersey"
+      field="{{ item.field }}"
+      headerText="{{ item.headerText }}"
       width="120"
       textAlign="Right"
-      (columnClicked)="onClick($event)"
-    ></e-column>
-    <e-column field="FIELD1" headerText="Player Name" width="120"></e-column>
-    <e-column
-      field="FIELD2"
-      headerText="Year"
-      width="100"
-      textAlign="Right"
-    ></e-column>
-    <e-column
-      field="FIELD3"
-      headerText="Stint"
-      width="120"
-      textAlign="Right"
-    ></e-column>
-    <e-column
-      field="FIELD4"
-      headerText="TMID"
-      width="120"
-      textAlign="Right"
+      [customAttributes]="customAttributes"
+      *ngFor="let item of columns"
     ></e-column>
   </e-columns>
 </ejs-treegrid>
-<ejs-dialog id='dialog' #ejDialog header='Feedback' [target]='targetElement'
-width='400px' [buttons]='buttons' showCloseIcon='true' height='300px'>
-<ng-template #content>
-      <form>
-          <div class='form-group'><label for='email'>Email:</label>
-              <input type='email' class='form-control' id='email'>
-          </div>
-          <div class='form-group'></div>
-          <div class='form-group'>
-              <label for='comment'>Comments:</label>
-              <textarea style='resize: none;' class='form-control' rows='5' id='comment'></textarea>
-          </div>
-      </form>
-</ng-template>
+<ejs-dialog
+  id="dialog"
+  #ejDialog
+  header="Add New Column"
+  [target]="targetElement"
+  width="400px"
+  showCloseIcon="true"
+  [visible]="dialogVisibility"
+>
+  <ng-template #content>
+    <form>
+      <div class="form-group">
+        <label for="colName">Column Name:</label>
+        <input type="text" class="form-control" id="colName" />
+      </div>
+      <button (click)="onCreateColumn()" class="btn btn-primary mr-2">
+        Save
+      </button>
+      <button (click)="onCancel()" class="btn btn-danger">Cancel</button>
+    </form>
+  </ng-template>
+</ejs-dialog>
+<ejs-dialog
+  id="chooseColumnDialog"
+  #chooseDialog
+  header="Choose Column"
+  [target]="targetElement"
+  width="400px"
+  showCloseIcon="true"
+  height="500px"
+  [visible]="dialogVisibility"
+>
+  <div class="btn-group">
+    <button
+      type="button"
+      class="btn btn-danger dropdown-toggle"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false"
+    >
+      Choose Column
+    </button>
+    <ul class="dropdown-menu">
+      <li *ngFor="let item of columnsCopy">
+        <input
+          type="checkbox"
+          [value]="item.field"
+          [checked]="item.checked"
+          (change)="onChooseColumn($event)"
+        />&nbsp;{{ item.headerText }}
+      </li>
+    </ul>
+  </div>
+</ejs-dialog>
+
+<ejs-dialog
+  id="dialog"
+  #columnDialog
+  header="Column Settings"
+  [target]="targetElement"
+  width="400px"
+  showCloseIcon="true"
+  [visible]="dialogVisibility"
+>
+  <ng-template #content>
+    <form [formGroup]="colForm">
+      <div class="form-group">
+        <label>Column Name:</label>
+        <input type="text" class="form-control" formControlName="name" />
+      </div>
+      <div class="form-group">
+        <select class="custom-select" formControlName="type">
+          <option value="" disabled>Choose your Type</option>
+          <option *ngFor="let type of types">{{ type }}</option>
+        </select>
+      </div>
+      <br />
+      <div class="form-group">
+        <label>Font Size:</label>
+        <input type="number" class="form-control" formControlName="size" />
+      </div>
+      <div class="form-group">
+        <label>Font Color:</label>
+        <input type="color" class="form-control" formControlName="fontColor" />
+      </div>
+      <div class="form-group">
+        <label>Background Color:</label>
+        <input type="color" class="form-control" formControlName="bgColor" />
+      </div>
+      <button (click)="onEditColumn()" class="btn btn-primary mr-2">
+        Save
+      </button>
+      <button (click)="onCancel()" class="btn btn-danger">Cancel</button>
+    </form>
+  </ng-template>
 </ejs-dialog>

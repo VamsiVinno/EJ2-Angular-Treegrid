@@ -1,0 +1,1 @@
+export const Types=['date','number','string','boolean']
