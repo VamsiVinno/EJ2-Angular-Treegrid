@@ -3,6 +3,7 @@ import { DialogComponent } from '@syncfusion/ej2-angular-popups';
 import { VirtualScrollService, TreeGridComponent, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService, RowDDService, SelectionService, EditSettingsModel, ToolbarItems, EditService, ContextMenuService, PageService } from '@syncfusion/ej2-angular-treegrid';
 import { dataSource, virtualData } from './data';
 import { Dialog } from '@syncfusion/ej2-popups';
+import { DialogUtility } from '@syncfusion/ej2-popups';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -11,6 +12,19 @@ import { Dialog } from '@syncfusion/ej2-popups';
 })
 export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('grid') grid!: any;
+  public hideDialog: any = () => {
+    this.ejDialog.hide();
+  }
+  public buttons: Object = [
+    {
+        'click': this.hideDialog.bind(this),
+        // Accessing button component properties by buttonModel property
+          buttonModel:{
+          content:'Submit',
+          isPrimary:true
+        }
+      }
+];
 
   public data: Object[] | undefined;
   public toolbar: string[] | undefined;
@@ -51,11 +65,11 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.data = virtualData.slice(0, 50);
     this.toolbar = ['ColumnChooser'];
     this.infiniteScrollSettings = { initialBlocks: 5 };
-    
+
     this.editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Row' };
     // this.toolbarOptions = ['Add', 'Edit', 'Delete', 'Update', 'Cancel', ];
     this.contextMenuItems = [...this.headerContextMenuItems,'SortAscending', 'SortDescending','Edit','Delete','AddRow',...this.rowContextMenuItems];
-  
+
   this.show=false
   }
   contextMenuOpen(args:any): void {
@@ -70,28 +84,31 @@ export class AppComponent implements OnInit, AfterViewInit {
         column.headerText = "Changed Text";
         this.grid.refreshColumns()
     }
-    if (args.item.id === 'newCol') {       
-       var obj = { field: "priority", headerText: 'NewColumn', width: 120 };  
-             this.grid.columns.push(obj as any);          
+    if (args.item.id === 'newCol') {
+       this.ejDialog.show();
+
+       var obj = { field: "priority", headerText: 'NewColumn', width: 120 };
+             this.grid.columns.push(obj as any);
              this.grid.refreshColumns();
     }
-    // if (args.item.id === 'delCol') {
-    //   this.grid.columns.filter((i:any,x:any) => {  
-    //       if(i.field == 'NewColumn') { 
-    //       this.grid.columns.splice(x,1); 
-    //   } 
-    //   }); 
-    //   this.grid.refreshColumns(); 
-    //     } 
+    if (args.item.id === 'delCol') {
+      DialogUtility.confirm('This is a Confirmation Dialog!')
+      this.grid.columns.filter((i:any,x:any) => {
+          if(i.field == 'NewColumn') {
+          this.grid.columns.splice(x,1);
+      }
+      });
+      this.grid.refreshColumns();
+        }
     if(args.item.id === 'filter') {
       this.show=true
-    }   
+    }
     if(args.item.id === 'multiSelect') {
-      
+
       this.selectOptions={type: 'Multiple'}
     }
     if(args.item.id === 'multiSelect') {
-      
+
       this.selectOptions={type: 'Multiple'}
     }
     if(args.item.id === 'copyRow'){
@@ -124,5 +141,5 @@ closeDialog() {
   onClick(event: any) {
     console.log(event);
   }
-  
+
 }

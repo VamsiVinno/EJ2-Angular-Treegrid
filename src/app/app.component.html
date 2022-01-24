@@ -15,7 +15,7 @@
   [editSettings]="editSettings"
   (rowDragStart)="onDrag($event)"
   [contextMenuItems]='contextMenuItems'
-  (contextMenuClick)='contextMenuClick($event)' 
+  (contextMenuClick)='contextMenuClick($event)'
   (contextMenuOpen)="contextMenuOpen($event)"
   #grid
   >
@@ -48,3 +48,18 @@
     ></e-column>
   </e-columns>
 </ejs-treegrid>
+<ejs-dialog id='dialog' #ejDialog header='Feedback' [target]='targetElement'
+width='400px' [buttons]='buttons' showCloseIcon='true' height='300px'>
+<ng-template #content>
+      <form>
+          <div class='form-group'><label for='email'>Email:</label>
+              <input type='email' class='form-control' id='email'>
+          </div>
+          <div class='form-group'></div>
+          <div class='form-group'>
+              <label for='comment'>Comments:</label>
+              <textarea style='resize: none;' class='form-control' rows='5' id='comment'></textarea>
+          </div>
+      </form>
+</ng-template>
+</ejs-dialog>
