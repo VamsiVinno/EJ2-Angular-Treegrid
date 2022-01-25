@@ -5,18 +5,18 @@
   height="291"
   childMapping="Crew"
   [infiniteScrollSettings]="infiniteScrollSettings"
-  [frozenColumns]=""
   [showColumnChooser]="show"
   [treeColumnIndex]="1"
   [allowFiltering]="show"
-  [allowSorting]="true"
+  [allowSorting]="sort"
   [allowRowDragAndDrop]="true"
   [selectionSettings]="selectOptions"
   [editSettings]="editSettings"
   (rowDragStart)="onDrag($event)"
   [contextMenuItems]="contextMenuItems"
-  (contextMenuClick)="contextMenuClick($event)"
   (contextMenuOpen)="contextMenuOpen($event)"
+  (contextMenuClick)="contextMenuClick($event)"
+  (onOpen)="itemBeforeEvent($event)"
   #grid
 >
   <e-columns>
@@ -25,11 +25,21 @@
       headerText="{{ item.headerText }}"
       width="120"
       textAlign="Right"
-      [customAttributes]="customAttributes"
       *ngFor="let item of columns"
+      fontSize="50"
+      (columnMenuClick)="onDrag($event)"
     ></e-column>
   </e-columns>
 </ejs-treegrid>
+<!-- <ejs-contextmenu
+  id="contextmenu"
+  #contextmenu
+  target=".e-headercell"
+  [items]="contextMenuItems"
+  (select)="onSelect($event)"
+  (beforeItemRender)="itemBeforeEvent($event)"
+></ejs-contextmenu
+>` -->
 <ejs-dialog
   id="dialog"
   #ejDialog
@@ -98,12 +108,18 @@
     <form [formGroup]="colForm">
       <div class="form-group">
         <label>Column Name:</label>
-        <input type="text" class="form-control" formControlName="name" />
+        <input
+          type="text"
+          class="form-control"
+          formControlName="name"
+          value="{{ headerText }}"
+        />
       </div>
       <div class="form-group">
+        <label>DataType:</label>
         <select class="custom-select" formControlName="type">
           <option value="" disabled>Choose your Type</option>
-          <option *ngFor="let type of types">{{ type }}</option>
+          <option *ngFor="let type of types" value={{type}}>{{ type }}</option>
         </select>
       </div>
       <br />
@@ -119,10 +135,22 @@
         <label>Background Color:</label>
         <input type="color" class="form-control" formControlName="bgColor" />
       </div>
+      <div class="form-group">
+        <label>Alignment:</label>
+        <select class="custom-select" formControlName="alignment">
+          <option value="" disabled>Choose Alignment</option>
+          <option *ngFor="let type of alignments" value={{type}}>
+            {{ type }}
+          </option>
+        </select>
+      </div>
       <button (click)="onEditColumn()" class="btn btn-primary mr-2">
         Save
       </button>
-      <button (click)="onCancel()" class="btn btn-danger">Cancel</button>
+      <button (click)="onEditCancel()" class="btn btn-danger">Cancel</button>
     </form>
   </ng-template>
 </ejs-dialog>
+
+<!-- (contextMenuOpen)="contextMenuOpen($event)"
+(contextMenuClick)="contextMenuClick($event)" -->
