@@ -11,3 +11,9 @@
   font-family: 'Bell MT';
   font-size: '20px';
 }
+.bgcolor{
+  background-color: pink;
+}
+.margin{
+  margin-right: 5px;
+}

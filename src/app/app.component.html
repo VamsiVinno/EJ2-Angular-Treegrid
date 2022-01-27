@@ -8,7 +8,6 @@
   [showColumnChooser]="show"
   [treeColumnIndex]="1"
   [allowFiltering]="show"
-  [allowSorting]="sort"
   [allowRowDragAndDrop]="true"
   [selectionSettings]="selectOptions"
   [editSettings]="editSettings"
@@ -16,7 +15,9 @@
   [contextMenuItems]="contextMenuItems"
   (contextMenuOpen)="contextMenuOpen($event)"
   (contextMenuClick)="contextMenuClick($event)"
-  (onOpen)="itemBeforeEvent($event)"
+  [sortSettings]='sortSettings' 
+  (actionComplete)="sorting($event)"
+  [allowSorting]="sort" 
   #grid
 >
   <e-columns>
@@ -31,15 +32,7 @@
     ></e-column>
   </e-columns>
 </ejs-treegrid>
-<!-- <ejs-contextmenu
-  id="contextmenu"
-  #contextmenu
-  target=".e-headercell"
-  [items]="contextMenuItems"
-  (select)="onSelect($event)"
-  (beforeItemRender)="itemBeforeEvent($event)"
-></ejs-contextmenu
->` -->
+
 <ejs-dialog
   id="dialog"
   #ejDialog
@@ -152,5 +145,78 @@
   </ng-template>
 </ejs-dialog>
 
-<!-- (contextMenuOpen)="contextMenuOpen($event)"
-(contextMenuClick)="contextMenuClick($event)" -->
+<div class="col-lg-2  bg-light" >
+
+              <div class="text-center">Properties </div>
+      <table id="property" class="property-panel-table" title="Properties" style="width: 100%">
+          <!-- <tr>
+              <td style="width: 70%">
+                  <div *ngFor="let item of columns" class="mb-2" style="width:150px">
+                     {{item.headerText}}
+                     <input type="checkbox"  value={{item.field}} (change)="onClick($event)"   >
+                  </div>
+              </td>
+          </tr> -->
+          <tr>
+            <td style="width: 70%">
+                <div>
+                  Player Jersey
+                </div>
+            </td>
+            <td style="width: 30%;padding:10px 10px 10px 0px">
+                <div class="col-md-6">
+                  <input type="checkbox"  [checked]="true" (change)="onClick1($event)"  #PlayerJersey >
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 70%">
+                <div>
+                  Player Name
+                </div>
+            </td>
+            <td style="width: 30%;padding:10px 10px 10px 0px">
+                <div class="col-md-6">
+                  <input type="checkbox"  [checked]="true" (change)="onClick2($event)"  #PlayerName >
+                    </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 70%">
+                <div>
+                  Year
+                </div>
+            </td>
+            <td style="width: 30%; padding:10px 10px 10px 0px">
+                <div class="col-md-6">
+                  <input type="checkbox"   (change)="onClick3($event)"   #Year>
+                    </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 70%">
+                <div>
+                  Stint
+                </div>
+            </td>
+            <td style="width: 30%; padding:10px 10px 10px 0px">
+                <div class="col-md-6">
+                  <input type="checkbox"   (change)="onClick4($event)"  #Stint >
+                    </div>
+            </td>
+        </tr>
+        <tr>
+          <td style="width: 70%">
+              <div>
+                TMID
+              </div>
+          </td>
+          <td style="width: 30%; padding:10px 10px 10px 0px">
+              <div class="col-md-6">
+                <input type="checkbox"   (change)="onClick5($event)" #TMID  >
+                  </div>
+          </td>
+      </tr>
+    </table>
+</div>
+  
