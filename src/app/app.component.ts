@@ -85,6 +85,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private row!: number;
   sortSettings!: any;
   cut!: boolean
+  private addChildIndex!: number
   private headerContextMenuItems = [
     { text: 'EditCol', target: '.e-headercell', id: 'editCol' },
     { text: 'NewCol', target: '.e-headercell', id: 'newCol' },
@@ -96,13 +97,14 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ]
   private rowContextMenuItems = [
+    { text: 'AddNext', target: '.e-row', id: 'addNext' },
+    { text: 'AddChild', target: '.e-row', id: 'addChild' },
     { text: 'MultiSelect', target: '.e-row', id: 'multiSelect' },
     { text: 'CopyRow', target: '.e-row', id: 'copyRow' },
     { text: 'CutRow', target: '.e-row', id: 'cutRow' },
     { text: 'PasteNext', target: '.e-row', id: 'pasteNext' },
     { text: 'PasteChild', target: '.e-row', id: 'pasteChild' },
-    { text: 'AddNext', target: '.e-row', id: 'addNext' },
-    { text: 'AddChild', target: '.e-row', id: 'addNext' }
+   
   ]
   ngOnInit(): void {
     dataSource();
@@ -114,7 +116,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       { field: 'FIELD1', direction: 'Ascending' }]
     }
     this.editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Row' };
-    this.contextMenuItems = [...this.headerContextMenuItems, 'Edit', 'Delete', 'AddRow', ...this.rowContextMenuItems];
+    this.contextMenuItems = [...this.headerContextMenuItems, 'Edit', 'Delete', ...this.rowContextMenuItems];
     this.show = false;
     this.customAttributes = {
       style: {
@@ -140,10 +142,10 @@ export class AppComponent implements OnInit, AfterViewInit {
         e.prepend(inputEl)
       }
     })
-    if (args.event.target.className == 'e-headercelldiv' || args.event.target.className == 'e-headertext') {
-      let addRow = document.getElementById('_gridcontrol_cmenu_AddRow')
-      console.log(addRow);
-    }
+    // if (args.event.target.className == 'e-headercelldiv' || args.event.target.className == 'e-headertext') {
+    //   let addRow = document.getElementById('_gridcontrol_cmenu_AddRow')
+    //   console.log(addRow);
+    // }
   }
 
   private onEditCol(args: any) {
@@ -160,7 +162,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
   private onDelCol(args: any) {
     const columnIndex = this.grid.columns.findIndex((value: any) => value.field == args.column.field);
-    if(columnIndex === -1) return;
+    if (columnIndex === -1) return;
     DialogUtility.confirm('Column is deleted')
     this.grid.columns.splice(columnIndex, 1);
     this.grid.refreshColumns();
@@ -212,6 +214,12 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.addRowDialog.show()
         break;
       }
+      case 'addChild': {
+        this.addChildIndex = args.rowInfo.rowData.parentItem?.index
+        this.addRowDialog.show()
+
+        break;
+      }
       case 'multiSelect': {
         let checked = this.onClickCheckBox(args)
         this.selectOptions = { type: checked ? 'Multiple' : 'Single' }
@@ -245,7 +253,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
       case 'pasteChild': {
         if (this.row) {
-          this.grid.flatData[args.rowInfo.rowData.index]?.Crew?.push(this.grid.flatData[this.row])
+          this.grid.flatData[args.rowInfo.rowData.parentItem.index]?.Crew?.push(this.grid.flatData[this.row])
           this.grid.refresh()
           if (this.cut) {
             this.grid.flatData.splice(this.row, 1)
@@ -444,15 +452,20 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.gridService.cancelDialog(this.columnDialog)
   }
   onChooseColumn(event: any) {
-    const {columns, grid, columnsCopy} = this;
-    this.gridService.chooseColumn(event, {grid, columnsCopy, columns});
+    const { columns, grid, columnsCopy } = this;
+    this.gridService.chooseColumn(event, { grid, columnsCopy, columns });
 
   }
   onAddRow() {
-    console.log(this.grid.flatData[2]);
-    if (this.rowIndex) {
+    if (this.addChildIndex >= 0) {
+      this.grid.flatData[this.addChildIndex]?.Crew?.push(this.rowForm.value)
+      this.grid.refresh()
+      this.addRowDialog.hide()
+    }
+    else {
       this.grid.flatData.splice(this.rowIndex + 1, 0, this.rowForm.value)
       this.grid.refreshColumns()
+      this.addRowDialog.hide()
     }
   }
   onCancelRow() {
