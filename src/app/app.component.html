@@ -15,9 +15,10 @@
   [contextMenuItems]="contextMenuItems"
   (contextMenuOpen)="contextMenuOpen($event)"
   (contextMenuClick)="contextMenuClick($event)"
-  [sortSettings]='sortSettings' 
   (actionComplete)="sorting($event)"
+  [enableInfiniteScrolling]="scroll"
   [allowSorting]="sort" 
+  [frozenColumns]="number"
   #grid
 >
   <e-columns>

@@ -19,7 +19,8 @@ import { AppComponent } from './app.component';
         MultiSelectModule,
         ReactiveFormsModule,
     ContextMenuModule,
-    ButtonModule
+    ButtonModule,
+   
     ],
     declarations: [AppComponent],
     bootstrap: [AppComponent]
