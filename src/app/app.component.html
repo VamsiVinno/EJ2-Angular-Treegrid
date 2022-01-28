@@ -1,48 +1,17 @@
-<ejs-treegrid
-  #treegrid
-  [dataSource]="data"
-  [enableVirtualization]="v"
-  height="291"
-  childMapping="Crew"
-  [infiniteScrollSettings]="infiniteScrollSettings"
-  [showColumnChooser]="show"
-  [treeColumnIndex]="1"
-  [allowFiltering]="show"
-  [allowRowDragAndDrop]="true"
-  [selectionSettings]="selectOptions"
-  [editSettings]="editSettings"
-  (rowDragStart)="onDrag($event)"
-  [contextMenuItems]="contextMenuItems"
-  (contextMenuOpen)="contextMenuOpen($event)"
-  (contextMenuClick)="contextMenuClick($event)"
-  (actionComplete)="sorting($event)"
-  [enableInfiniteScrolling]="scroll"
-  [allowSorting]="sort"
-  [frozenColumns]="number"
-  #grid
->
+<ejs-treegrid [dataSource]="data" [enableVirtualization]="v" height="291" childMapping="Crew"
+  [infiniteScrollSettings]="infiniteScrollSettings" [showColumnChooser]="show" [treeColumnIndex]="1"
+  [allowFiltering]="show" [allowRowDragAndDrop]="true" [selectionSettings]="selectOptions" [editSettings]="editSettings"
+  (rowDragStart)="onDrag($event)" [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
+  (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" [enableInfiniteScrolling]="scroll"
+  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings" #grid>
   <e-columns>
-    <e-column
-      field="{{ item.field }}"
-      headerText="{{ item.headerText }}"
-      width="120"
-      textAlign="Right"
-      *ngFor="let item of columns"
-      fontSize="50"
-      (columnMenuClick)="onDrag($event)"
-    ></e-column>
+    <e-column field="{{ item.field }}" headerText="{{ item.headerText }}" width="120" textAlign="Right"
+      *ngFor="let item of columns" fontSize="50" (columnMenuClick)="onDrag($event)"></e-column>
   </e-columns>
 </ejs-treegrid>
 
-<ejs-dialog
-  id="dialog"
-  #ejDialog
-  header="Add New Column"
-  [target]="targetElement"
-  width="400px"
-  showCloseIcon="true"
-  [visible]="dialogVisibility"
->
+<ejs-dialog id="dialog" #ejDialog header="Add New Column" [target]="targetElement" width="400px" showCloseIcon="true"
+  [visible]="dialogVisibility">
   <ng-template #content>
     <form>
       <div class="form-group">
@@ -56,58 +25,29 @@
     </form>
   </ng-template>
 </ejs-dialog>
-<ejs-dialog
-  id="chooseColumnDialog"
-  #chooseDialog
-  header="Choose Column"
-  [target]="targetElement"
-  width="400px"
-  showCloseIcon="true"
-  height="500px"
-  [visible]="dialogVisibility"
->
+<ejs-dialog id="chooseColumnDialog" #chooseDialog header="Choose Column" [target]="targetElement" width="400px"
+  showCloseIcon="true" height="500px" [visible]="dialogVisibility">
   <div class="btn-group">
-    <button
-      type="button"
-      class="btn btn-danger dropdown-toggle"
-      data-toggle="dropdown"
-      aria-haspopup="true"
-      aria-expanded="false"
-    >
+    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+      aria-expanded="false">
       Choose Column
     </button>
     <ul class="dropdown-menu">
       <li *ngFor="let item of columnsCopy">
-        <input
-          type="checkbox"
-          [value]="item.field"
-          [checked]="item.checked"
-          (change)="onChooseColumn($event)"
-        />&nbsp;{{ item.headerText }}
+        <input type="checkbox" [value]="item.field" [checked]="item.checked"
+          (change)="onChooseColumn($event)" />&nbsp;{{ item.headerText }}
       </li>
     </ul>
   </div>
 </ejs-dialog>
 
-<ejs-dialog
-  id="dialog"
-  #columnDialog
-  header="Column Settings"
-  [target]="targetElement"
-  width="400px"
-  showCloseIcon="true"
-  [visible]="dialogVisibility"
->
+<ejs-dialog id="dialog" #columnDialog header="Column Settings" [target]="targetElement" width="400px"
+  showCloseIcon="true" [visible]="dialogVisibility">
   <ng-template #content>
     <form [formGroup]="colForm">
       <div class="form-group">
         <label>Column Name:</label>
-        <input
-          type="text"
-          class="form-control"
-          formControlName="name"
-          value="{{ headerText }}"
-        />
+        <input type="text" class="form-control" formControlName="name" value="{{ headerText }}" />
       </div>
       <div class="form-group">
         <label>DataType:</label>
@@ -146,77 +86,61 @@
   </ng-template>
 </ejs-dialog>
 
-<div class="col-lg-2  bg-light" >
-
-              <div class="text-center">Properties </div>
-      <table id="property" class="property-panel-table" title="Properties" style="width: 100%">
-          <!-- <tr>
-              <td style="width: 70%">
-                  <div *ngFor="let item of columns" class="mb-2" style="width:150px">
-                     {{item.headerText}}
-                     <input type="checkbox"  value={{item.field}} (change)="onClick($event)"   >
-                  </div>
-              </td>
-          </tr> -->
-          <tr>
-            <td style="width: 70%">
-                <div>
-                  Player Jersey
-                </div>
-            </td>
-            <td style="width: 30%;padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"  [checked]="true" (change)="onClick1($event)"  #PlayerJersey >
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 70%">
-                <div>
-                  Player Name
-                </div>
-            </td>
-            <td style="width: 30%;padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"  [checked]="true" (change)="onClick2($event)"  #PlayerName >
-                    </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 70%">
-                <div>
-                  Year
-                </div>
-            </td>
-            <td style="width: 30%; padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"   (change)="onClick3($event)"   #Year>
-                    </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 70%">
-                <div>
-                  Stint
-                </div>
-            </td>
-            <td style="width: 30%; padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"   (change)="onClick4($event)"  #Stint >
-                    </div>
-            </td>
-        </tr>
-        <tr>
-          <td style="width: 70%">
-              <div>
-                TMID
-              </div>
-          </td>
-          <td style="width: 30%; padding:10px 10px 10px 0px">
-              <div class="col-md-6">
-                <input type="checkbox"   (change)="onClick5($event)" #TMID  >
-                  </div>
-          </td>
+<div class="col-lg-3 property-section" *ngIf="sort">
+  <div class="property-panel-section">
+    <div class="property-panel-header">Properties</div>
+    <table id="property" class="property-panel-table" title="Properties" style="width: 100%">
+      <tr>
+        <td style="width: 70%">
+          <div>Player Jersey</div>
+        </td>
+        <td style="width: 30%;padding:10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox #PlayerJersey value="TaskID" (change)="onClick($event, PlayerJersey)">
+            </ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>Player Name</div>
+        </td>
+        <td style="width: 30%;padding:10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox #PlayerName value="FIELD1" (change)="onClick($event, PlayerName)"></ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>Year</div>
+        </td>
+        <td style="width: 30%; padding:10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox #Year value="FIELD2" (change)="onClick($event, Year)"></ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>Stint</div>
+        </td>
+        <td style="width: 30%; padding:10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox #Stint value="FIELD3" (change)="onClick($event, Stint)"></ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>TMID</div>
+        </td>
+        <td style="width: 30%; padding:10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox #TMID value="FIELD4" (change)="onClick($event, TMID)"></ejs-checkbox>
+          </div>
+        </td>
       </tr>
     </table>
+  </div>
 </div>

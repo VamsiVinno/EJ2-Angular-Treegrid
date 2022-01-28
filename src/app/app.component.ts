@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, ElementRef, AfterViewInit, OnChanges } from '@angular/core';
 import { DialogComponent } from '@syncfusion/ej2-angular-popups';
-import { VirtualScrollService, TreeGridComponent, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService, RowDDService, SelectionService, EditSettingsModel, ToolbarItems, EditService, ContextMenuService, PageService, LoggerService, InfiniteScrollService } from '@syncfusion/ej2-angular-treegrid';
+import { VirtualScrollService, TreeGridComponent, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService, RowDDService, SelectionService, EditSettingsModel, ToolbarItems, EditService, ContextMenuService, PageService, LoggerService, InfiniteScrollService, TreeGrid } from '@syncfusion/ej2-angular-treegrid';
 import { dataSource, virtualData } from './data';
 import { DialogUtility } from '@syncfusion/ej2-popups';
 import { FormBuilder } from '@angular/forms';
@@ -47,7 +47,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   scroll!: boolean
   number!: number
   contextMenuItems!: any[];
-  treeGridObj!: TreeGridComponent;
   show!: boolean
   @ViewChild('ejDialog') ejDialog!: DialogComponent;
   @ViewChild('chooseDialog') chooseDialog!: DialogComponent;
@@ -98,8 +97,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.toolbar = ['ColumnChooser'];
     this.infiniteScrollSettings = { initialBlocks: 5 };
     this.sortSettings = {
-      columns: [{ field: 'TaskID', direction: 'Ascending' },
-      { field: 'FIELD1', direction: 'Ascending' }]
+      columns: []
     }
     this.editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Row' };
     // this.toolbarOptions = ['Add', 'Edit', 'Delete', 'Update', 'Cancel', ];
@@ -145,7 +143,7 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private onDelCol(args: any) {
     const columnIndex = this.grid.columns.findIndex((value: any) => value.field == args.column.field);
-    if(columnIndex === -1) return;
+    if (columnIndex === -1) return;
     DialogUtility.confirm('Column is deleted')
     this.grid.columns.splice(columnIndex, 1);
 
@@ -209,7 +207,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       case 'copyRow': {
         this.grid.copy()
         this.row = this.rowIndex;
-        this.cut=false
+        this.cut = false
         // let row = this.grid.flatData[this.rowIndex] as HTMLTableElement
         // console.log(row);
         // row.style.background = '#336c12';
@@ -218,18 +216,18 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
       case 'pasteNext': {
         this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
-        if (this.row && this.cut) this.grid.flatData.splice(this.row,1)
+        if (this.row && this.cut) this.grid.flatData.splice(this.row, 1)
         this.grid.refreshColumns();
         break;
       }
       case 'pasteChild': {
-        if (this.row  && this.cut) {
+        if (this.row && this.cut) {
           this.grid.flatData[args.rowInfo.rowData.parentItem.index].Crew?.push(this.grid.flatData[this.row])
-          console.log(this.grid.flatData.splice(this.row,1));
+          console.log(this.grid.flatData.splice(this.row, 1));
 
           this.grid.refresh()
         }
-        else{
+        else {
           this.grid.flatData[args.rowInfo.rowData.parentItem.index].Crew?.push(this.grid.flatData[this.row])
           this.grid.refresh()
         }
@@ -240,7 +238,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-
+    // TreeGrid.prototype.getRowByIndex = getRowByIndex.bind(this)
+    // function getRowByIndex(this: any, index: number) {
+    //   console.log(this.grid.getDataRows().filter((e: any) => parseInt(e.getAttribute('aria-rowindex'), 10) === index)[0])
+    //   return this.grid.getDataRows().filter((e: any) => parseInt(e.getAttribute('aria-rowindex'), 10) === index)[0] || {
+    //     getAttribute: (data: boolean) => false
+    //   };
+    // }
+    // console.log(TreeGrid)
+    // console.log(this.grid)
 
   }
   onFiltering(e: any) {
@@ -255,8 +261,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   sorting(args: any): void {
     console.log(args);
     if (args.requestType === 'sorting') {
-      for (let columns of this.grid.columns) {
-        for (let sortcolumns of this.sortSettings['columns']) {
+      for (let columns of this.grid.getColumns()) {
+        for (let sortcolumns of this.grid.sortSettings.columns) {
           if (sortcolumns.field === columns.field) {
             this.check(sortcolumns.field, true); break;
           } else {
@@ -276,75 +282,21 @@ export class AppComponent implements OnInit, AfterViewInit {
       case 'FIELD2':
         this.Year.checked = state; break;
       case 'FIELD3':
-        this.TMID.checked = state; break;
-      case 'FIELD4':
         this.Stint.checked = state; break;
+      case 'FIELD4':
+        this.TMID.checked = state; break;
     }
   }
 
   // Multi sorting No working
-  onClick(event: any) {
-    const { checked, value } = event.target;
+  onClick(event: any, ele?: any) {
+    const { checked, value } = ele;
     if (checked) {
       this.grid.sortByColumn(value, 'Ascending', true);
     } else {
       this.grid.grid.removeSortColumn(value);
     }
-
-    // this.columns.map(col => {
-    //   if (col.field === event.target.value && event.target.checked) {
-    //     console.log(event.target.value);
-    //     console.log(this.grid);
-    //     this.grid.sortByColumn(col.field, 'Ascending', true);
-    //   }
-    //   else {
-    //     this.grid.grid.removeSortColumn(col.field);
-    //   }
-
-    // })
-
   }
-  onClick1(e: any): void {
-    if (this.PlayerJersey.checked) {
-      this.grid.sortByColumn('TaskID', 'Ascending', true);
-    } else {
-      this.grid.grid.removeSortColumn('TaskID');
-    }
-
-  }
-  onClick2(e: any): void {
-    if (this.PlayerName.checked) {
-      this.grid.sortByColumn('FIELD1', 'Ascending', true);
-    } else {
-      this.grid.grid.removeSortColumn('FIELD1');
-    }
-
-  }
-  onClick3(e: any): void {
-    if (this.Year.checked) {
-      this.grid.sortByColumn('FIELD2', 'Ascending', true);
-    } else {
-      this.grid.grid.removeSortColumn('FIELD2');
-    }
-
-  }
-  onClick4(e: any): void {
-    if (this.Stint.checked) {
-      this.grid.sortByColumn('FIELD3', 'Ascending', true);
-    } else {
-      this.grid.grid.removeSortColumn('FIELD3');
-    }
-
-  }
-  onClick5(e: any): void {
-    if (this.TMID.checked) {
-      this.grid.sortByColumn('FIELD4', 'Ascending', true);
-    } else {
-      this.grid.grid.removeSortColumn('FIELD4');
-    }
-
-  }
-
 
   // if (args.item.text === 'Edit') {
   //   if (this.grid.getSelectedRecords().length) {
@@ -423,8 +375,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.gridService.cancelDialog(this.columnDialog)
   }
   onChooseColumn(event: any) {
-    const {columns, grid, columnsCopy} = this;
-    this.gridService.chooseColumn(event, {grid, columnsCopy, columns});
+    const { columns, grid, columnsCopy } = this;
+    this.gridService.chooseColumn(event, { grid, columnsCopy, columns });
 
   }
 }
