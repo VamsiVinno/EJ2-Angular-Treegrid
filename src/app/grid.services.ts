@@ -17,7 +17,7 @@ export class GridService {
        grid.refreshColumns();
         dialog.hide()
       }
-    chooseColumn(event: any, columns: any, grid: TreeGridComponent, columnsCopy: any) {
+    chooseColumn(event: any, {columns, grid, columnsCopy}: {columns: any, grid: TreeGridComponent, columnsCopy: any}) {
         let checkedColumns = []
         checkedColumns.push(event.target.value)
         if (event.target.checked == false) {

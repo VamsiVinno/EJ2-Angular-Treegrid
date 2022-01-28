@@ -17,7 +17,7 @@
   (contextMenuClick)="contextMenuClick($event)"
   (actionComplete)="sorting($event)"
   [enableInfiniteScrolling]="scroll"
-  [allowSorting]="sort" 
+  [allowSorting]="sort"
   [frozenColumns]="number"
   #grid
 >
@@ -49,10 +49,10 @@
         <label for="colName">Column Name:</label>
         <input type="text" class="form-control" id="colName" />
       </div>
-      <button (click)="onCreateColumn()" class="btn btn-primary mr-2">
+      <button type="button" (click)="onCreateColumn()" class="btn btn-primary mr-2">
         Save
       </button>
-      <button (click)="onCancel()" class="btn btn-danger">Cancel</button>
+      <button type="button" (click)="onCancel()" class="btn btn-danger">Cancel</button>
     </form>
   </ng-template>
 </ejs-dialog>
@@ -220,4 +220,3 @@
       </tr>
     </table>
 </div>
-  

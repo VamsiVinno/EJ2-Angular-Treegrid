@@ -32,48 +32,48 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @ViewChild('grid') grid!: any;
   newColName!: any
-  public hideDialog: any = () => {
+  hideDialog: any = () => {
     this.ejDialog.hide();
   }
   columns = COLUMNS
   columnsCopy = [...this.columns]
-  public data: Object[] | undefined;
-  public toolbar: string[] | undefined;
-  public infiniteScrollSettings!: Object;
-  public selectOptions!: Object;
-  public toolbarOptions!: any[];
-  public editSettings!: EditSettingsModel;
+  data: Object[] | undefined;
+  toolbar: string[] | undefined;
+  infiniteScrollSettings!: Object;
+  selectOptions!: Object;
+  toolbarOptions!: any[];
+  editSettings!: EditSettingsModel;
   v = true;
-  public scroll!: boolean
-  public number!: number
-  public contextMenuItems!: any[];
-  public treeGridObj!: TreeGridComponent;
+  scroll!: boolean
+  number!: number
+  contextMenuItems!: any[];
+  treeGridObj!: TreeGridComponent;
   show!: boolean
   @ViewChild('ejDialog') ejDialog!: DialogComponent;
   @ViewChild('chooseDialog') chooseDialog!: DialogComponent;
   @ViewChild('columnDialog') columnDialog!: DialogComponent;
-  @ViewChild('PlayerJersey') public PlayerJersey!: CheckBoxComponent;
-  @ViewChild('PlayerName') public PlayerName!: CheckBoxComponent;
-  @ViewChild('Year') public Year!: CheckBoxComponent;
-  @ViewChild('Stint') public Stint!: CheckBoxComponent;
-  @ViewChild('TMID') public TMID!: CheckBoxComponent;
-  public types = Types
-  public alignments = Alignments
-  public targetElement!: HTMLElement;
-  public rowIndex!: number;
-  public cellIndex!: number;
-  public placeholder: string = 'Select games';
-  public selectAllText!: string
-  public field = { text: 'headerText', value: 'field' };
-  public dialogVisibility: boolean = false;
+  @ViewChild('PlayerJersey') PlayerJersey!: CheckBoxComponent;
+  @ViewChild('PlayerName') PlayerName!: CheckBoxComponent;
+  @ViewChild('Year') Year!: CheckBoxComponent;
+  @ViewChild('Stint') Stint!: CheckBoxComponent;
+  @ViewChild('TMID') TMID!: CheckBoxComponent;
+  types = Types
+  alignments = Alignments
+  targetElement!: HTMLElement;
+  rowIndex!: number;
+  cellIndex!: number;
+  placeholder: string = 'Select games';
+  selectAllText!: string
+  field = { text: 'headerText', value: 'field' };
+  dialogVisibility: boolean = false;
   private colField!: string;
-  public customAttributes!: any;
-  public headerText!: string;
-  public textAlign!: string
-  public sort!: boolean;
+  customAttributes!: any;
+  headerText!: string;
+  textAlign!: string
+  sort!: boolean;
   private row!: number;
-  public sortSettings!: any;
-  public cut!: boolean
+  sortSettings!: any;
+  cut!: boolean
   private headerContextMenuItems = [
     { text: 'EditCol', target: '.e-headercell', id: 'editCol' },
     { text: 'NewCol', target: '.e-headercell', id: 'newCol' },
@@ -121,76 +121,84 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.cellIndex = args.rowInfo.cellIndex;
     let list = document.getElementById('_gridcontrol_cmenu')
     let arr = Array.from(list?.children!)
-    arr.map(e => {
-      if (e.innerHTML === 'Filter' || e.innerHTML === 'FreezeCol' || e.innerHTML === 'MultiSorting' || e.innerHTML == 'MultiSelect') {
-        const newItem = document.createElement('input');
-        newItem.type = "checkbox";
-        newItem.id = e.id;
-        newItem.style.marginRight = '5px'
-        e.prepend(newItem)
+    arr.forEach(e => {
+      if (['Filter', 'FreezeCol', 'MultiSorting', 'MultiSelect'].includes(e.innerHTML)) {
+        const inputEl = document.createElement('input');
+        inputEl.type = "checkbox";
+        inputEl.id = e.id;
+        inputEl.style.marginRight = '5px'
+        e.prepend(inputEl)
       }
     })
   }
+
+  private onEditCol(args: any) {
+    this.columnDialog.show()
+    this.colField = args.column.field
+    this.headerText = args.column.headerText
+    this.textAlign = args.column.textAlign
+  }
+
+  private onSortCol(args: any) {
+    this.sort = args.event.target.checked;
+  }
+
+  private onDelCol(args: any) {
+    const columnIndex = this.grid.columns.findIndex((value: any) => value.field == args.column.field);
+    if(columnIndex === -1) return;
+    DialogUtility.confirm('Column is deleted')
+    this.grid.columns.splice(columnIndex, 1);
+
+    this.grid.refreshColumns();
+  }
+
+  // Not Working
+  onFreezeCol(args: any) {
+    // const isChecked = args.event.target.checked;
+    // this.scroll = isChecked;
+    // this.number = isChecked ? 1 : 0;
+    if (args.event.target.checked) {
+      this.scroll = true
+      this.number = 1
+    }
+    else {
+      this.show = false
+      this.number = 0
+    }
+  }
+
+
   contextMenuClick(args?: any): void {
+    const isChecked = Boolean(args.event.target.checked);
     switch (args.item.id) {
       case 'editCol': {
-        this.columnDialog.show()
-        this.colField = args.column.field
-        this.headerText = args.column.headerText
-        this.textAlign = args.column.textAlign
-        break;
+        return this.onEditCol(args);
       }
       case 'sorting': {
-        if (args.event.target.checked) {
-          this.sort = true
-        }
-        else this.sort = false
-        break;
+        return this.onSortCol(args);
       }
       case 'newCol': {
         this.ejDialog.show();
         break;
       }
       case 'delCol': {
-        this.grid.columns.filter((i: any, x: any) => {
-
-          if (i.field == args.column.field) {
-            DialogUtility.confirm('Column is deleted')
-            this.grid.columns.splice(x, 1);
-          }
-        });
-        this.grid.refreshColumns();
-        break;
+        return this.onDelCol(args);
       }
       case 'chooseCol': {
         this.chooseDialog.show()
         break;
       }
+      // Not Working
       case 'freezeCol': {
-        if (args.event.target.checked) {
-          this.scroll = true
-          this.number = 1
-        }
-        else {
-          this.show = false
-          this.number = 0
-        }
-        break;
+        return this.onFreezeCol(args);
       }
       case 'filter': {
-        if (args.event.target.checked) {
-          this.show = true
-        }
-        else this.show = false
-        break;
+        this.show = isChecked
+        return;
       }
       case 'multiSelect': {
-        if (args.event.target.checked) {
-          this.selectOptions = { type: 'Multiple' }
-        }
-        else this.selectOptions = { type: '' }
-
-        break;
+        this.selectOptions = { type: isChecked ? 'Multiple' : '' }
+        return;
       }
       case 'cutRow': {
         this.grid.copy()
@@ -209,25 +217,16 @@ export class AppComponent implements OnInit, AfterViewInit {
         break;
       }
       case 'pasteNext': {
-        if (this.row && this.cut) {
-          this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
-        this.grid.flatData.splice(this.row,1)
-          this.grid.refreshColumns()
-        }
-        else{
-          console.log('copy');
-          
-          this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
-          this.grid.refreshColumns()
-        }
-
+        this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
+        if (this.row && this.cut) this.grid.flatData.splice(this.row,1)
+        this.grid.refreshColumns();
         break;
       }
       case 'pasteChild': {
         if (this.row  && this.cut) {
           this.grid.flatData[args.rowInfo.rowData.parentItem.index].Crew?.push(this.grid.flatData[this.row])
           console.log(this.grid.flatData.splice(this.row,1));
-           
+
           this.grid.refresh()
         }
         else{
@@ -253,7 +252,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     // this.v = false;
 
   }
-  public sorting(args: any): void {
+  sorting(args: any): void {
     console.log(args);
     if (args.requestType === 'sorting') {
       for (let columns of this.grid.columns) {
@@ -268,7 +267,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
   }
-  public check(field: string, state: boolean): void {
+  check(field: string, state: boolean): void {
     switch (field) {
       case 'TaskID':
         this.PlayerJersey.checked = state; break;
@@ -283,21 +282,29 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // Multi sorting No working
   onClick(event: any) {
-    this.columns.map(col => {
-      if (col.field === event.target.value && event.target.checked) {
-        console.log(event.target.value);
-        console.log(this.grid);
-        this.grid.sortByColumn(col.field, 'Ascending', true);
-      }
-      else {
-        this.grid.grid.removeSortColumn(col.field);
-      }
+    const { checked, value } = event.target;
+    if (checked) {
+      this.grid.sortByColumn(value, 'Ascending', true);
+    } else {
+      this.grid.grid.removeSortColumn(value);
+    }
 
-    })
+    // this.columns.map(col => {
+    //   if (col.field === event.target.value && event.target.checked) {
+    //     console.log(event.target.value);
+    //     console.log(this.grid);
+    //     this.grid.sortByColumn(col.field, 'Ascending', true);
+    //   }
+    //   else {
+    //     this.grid.grid.removeSortColumn(col.field);
+    //   }
+
+    // })
 
   }
-  public onClick1(e: any): void {
+  onClick1(e: any): void {
     if (this.PlayerJersey.checked) {
       this.grid.sortByColumn('TaskID', 'Ascending', true);
     } else {
@@ -305,7 +312,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
   }
-  public onClick2(e: any): void {
+  onClick2(e: any): void {
     if (this.PlayerName.checked) {
       this.grid.sortByColumn('FIELD1', 'Ascending', true);
     } else {
@@ -313,7 +320,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
   }
-  public onClick3(e: any): void {
+  onClick3(e: any): void {
     if (this.Year.checked) {
       this.grid.sortByColumn('FIELD2', 'Ascending', true);
     } else {
@@ -321,7 +328,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
   }
-  public onClick4(e: any): void {
+  onClick4(e: any): void {
     if (this.Stint.checked) {
       this.grid.sortByColumn('FIELD3', 'Ascending', true);
     } else {
@@ -329,7 +336,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
 
   }
-  public onClick5(e: any): void {
+  onClick5(e: any): void {
     if (this.TMID.checked) {
       this.grid.sortByColumn('FIELD4', 'Ascending', true);
     } else {
@@ -364,13 +371,13 @@ export class AppComponent implements OnInit, AfterViewInit {
         switch (colObj.type) {
           case 'string': {
             this.grid.flatData.map((data: any) => {
-              data[this.colField] = 'Vinno'
+              data[this.colField] = String(data[this.colField]) || "none"
             })
             break;
           }
           case 'number': {
             this.grid.flatData.map((data: any) => {
-              data[this.colField] = 4
+              data[this.colField] = parseInt(data[this.colField]) || 0;
             })
             break;
           }
@@ -416,7 +423,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.gridService.cancelDialog(this.columnDialog)
   }
   onChooseColumn(event: any) {
-    this.gridService.chooseColumn(event, this.columns, this.grid, this.columnsCopy)
+    const {columns, grid, columnsCopy} = this;
+    this.gridService.chooseColumn(event, {grid, columnsCopy, columns});
 
   }
 }
