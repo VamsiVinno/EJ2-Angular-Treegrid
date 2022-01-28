@@ -21,8 +21,8 @@ export class GridService {
         let checkedColumns = []
         checkedColumns.push(event.target.value)
         if (event.target.checked == false) {
-            checkedColumns.map(e => {
-                columns.map((f: any) => {
+            checkedColumns.forEach(e => {
+                columns.forEach((f: any) => {
                     if (e === f.field) {
                         grid.hideColumns([f.field, f.headerText]);
                     }
@@ -30,8 +30,8 @@ export class GridService {
             })
         }
         else if (event.target.checked) {
-            checkedColumns.map(e => {
-                columnsCopy.map((f: any) => {
+            checkedColumns.forEach(e => {
+                columnsCopy.forEach((f: any) => {
                     if (e === f.field) {
                         grid.showColumns([f.field, f.headerText]);
                     }

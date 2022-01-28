@@ -49,10 +49,16 @@
         <label for="colName">Column Name:</label>
         <input type="text" class="form-control" id="colName" />
       </div>
-      <button type="button" (click)="onCreateColumn()" class="btn btn-primary mr-2">
+      <button
+        type="button"
+        (click)="onCreateColumn()"
+        class="btn btn-primary mr-2"
+      >
         Save
       </button>
-      <button type="button" (click)="onCancel()" class="btn btn-danger">Cancel</button>
+      <button type="button" (click)="onCancel()" class="btn btn-danger">
+        Cancel
+      </button>
     </form>
   </ng-template>
 </ejs-dialog>
@@ -113,7 +119,13 @@
         <label>DataType:</label>
         <select class="custom-select" formControlName="type">
           <option value="" disabled>Choose your Type</option>
-          <option *ngFor="let type of types" value={{type}}>{{ type }}</option>
+          <option
+            *ngFor="let type of types"
+            value="{{ type }}"
+            [selected]="type == dataType"
+          >
+            {{ type }}
+          </option>
         </select>
       </div>
       <br />
@@ -133,90 +145,160 @@
         <label>Alignment:</label>
         <select class="custom-select" formControlName="alignment">
           <option value="" disabled>Choose Alignment</option>
-          <option *ngFor="let type of alignments" value={{type}}>
+          <option
+            *ngFor="let type of alignments"
+            value="{{ type }}"
+            [selected]="type == textAlign"
+          >
             {{ type }}
           </option>
         </select>
       </div>
-      <button (click)="onEditColumn()" class="btn btn-primary mr-2">
+      <button
+        type="button"
+        (click)="onEditColumn()"
+        class="btn btn-primary mr-2"
+      >
         Save
       </button>
-      <button (click)="onEditCancel()" class="btn btn-danger">Cancel</button>
+      <button type="button" (click)="onEditCancel()" class="btn btn-danger">
+        Cancel
+      </button>
     </form>
   </ng-template>
 </ejs-dialog>
 
-<div class="col-lg-2  bg-light" >
+<ejs-dialog
+  id="dialog"
+  #addRowDialog
+  header="Adding Row"
+  [target]="targetElement"
+  width="400px"
+  showCloseIcon="true"
+  [visible]="dialogVisibility"
+>
+  <ng-template #content>
+    <form [formGroup]="rowForm">
+      <div class="form-group">
+        <label>Player Jersey:</label>
+        <input
+          type="number"
+          class="form-control"
+          formControlName="TaskID"
+          value="{{ headerText }}"
+        />
+      </div>
+      <div class="form-group">
+        <label>Player Name:</label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="FIELD1"
+          value="{{ headerText }}"
+        />
+      </div>
+      <br />
+      <div class="form-group">
+        <label>Year:</label>
+        <input type="number" class="form-control" formControlName="FIELD2" />
+      </div>
+      <div class="form-group">
+        <label>Stint:</label>
+        <input type="number" class="form-control" formControlName="FIELD3" />
+      </div>
+      <div class="form-group">
+        <label>TMID:</label>
+        <input type="number" class="form-control" formControlName="FIELD4" />
+      </div>
+      <button type="button" (click)="onAddRow()" class="btn btn-primary mr-2">
+        Save
+      </button>
+      <button type="button" (click)="onCancelRow()" class="btn btn-danger">
+        Cancel
+      </button>
+    </form>
+  </ng-template>
+</ejs-dialog>
 
-              <div class="text-center">Properties </div>
-      <table id="property" class="property-panel-table" title="Properties" style="width: 100%">
-          <!-- <tr>
-              <td style="width: 70%">
-                  <div *ngFor="let item of columns" class="mb-2" style="width:150px">
-                     {{item.headerText}}
-                     <input type="checkbox"  value={{item.field}} (change)="onClick($event)"   >
-                  </div>
-              </td>
-          </tr> -->
-          <tr>
-            <td style="width: 70%">
-                <div>
-                  Player Jersey
-                </div>
-            </td>
-            <td style="width: 30%;padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"  [checked]="true" (change)="onClick1($event)"  #PlayerJersey >
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 70%">
-                <div>
-                  Player Name
-                </div>
-            </td>
-            <td style="width: 30%;padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"  [checked]="true" (change)="onClick2($event)"  #PlayerName >
-                    </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 70%">
-                <div>
-                  Year
-                </div>
-            </td>
-            <td style="width: 30%; padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"   (change)="onClick3($event)"   #Year>
-                    </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 70%">
-                <div>
-                  Stint
-                </div>
-            </td>
-            <td style="width: 30%; padding:10px 10px 10px 0px">
-                <div class="col-md-6">
-                  <input type="checkbox"   (change)="onClick4($event)"  #Stint >
-                    </div>
-            </td>
-        </tr>
-        <tr>
-          <td style="width: 70%">
-              <div>
-                TMID
-              </div>
-          </td>
-          <td style="width: 30%; padding:10px 10px 10px 0px">
-              <div class="col-md-6">
-                <input type="checkbox"   (change)="onClick5($event)" #TMID  >
-                  </div>
-          </td>
+<!-- <div class="col-lg-3 property-section" *ngIf="sort">
+  <div class="property-panel-section">
+    <div class="property-panel-header">Properties</div>
+    <table
+      id="property"
+      class="property-panel-table"
+      title="Properties"
+      style="width: 100%"
+    >
+      <tr>
+        <td style="width: 70%">
+          <div>Player Jersey</div>
+        </td>
+        <td style="width: 30%; padding: 10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox
+              #PlayerJersey
+              value="TaskID"
+              (change)="onClick($event, PlayerJersey)"
+            >
+            </ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>Player Name</div>
+        </td>
+        <td style="width: 30%; padding: 10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox
+              #PlayerName
+              value="FIELD1"
+              (change)="onClick($event, PlayerName)"
+            ></ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>Year</div>
+        </td>
+        <td style="width: 30%; padding: 10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox
+              #Year
+              value="FIELD2"
+              (change)="onClick($event, Year)"
+            ></ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>Stint</div>
+        </td>
+        <td style="width: 30%; padding: 10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox
+              #Stint
+              value="FIELD3"
+              (change)="onClick($event, Stint)"
+            ></ejs-checkbox>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 70%">
+          <div>TMID</div>
+        </td>
+        <td style="width: 30%; padding: 10px 10px 10px 0px">
+          <div class="col-md-6">
+            <ejs-checkbox
+              #TMID
+              value="FIELD4"
+              (change)="onClick($event, TMID)"
+            ></ejs-checkbox>
+          </div>
+        </td>
       </tr>
     </table>
-</div>
+</div> -->

@@ -12,8 +12,11 @@
   font-size: '20px';
 }
 .bgcolor{
-  background-color: pink;
+  background-color: rgb(255, 192, 203) !important;
 }
 .margin{
   margin-right: 5px;
+}
+.display{
+display: none !important;;
 }

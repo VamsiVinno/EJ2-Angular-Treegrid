@@ -24,10 +24,19 @@ export class AppComponent implements OnInit, AfterViewInit {
     type: [],
     alignment: []
   })
+  rowForm = this.fb.group({
+    TaskID: [],
+    FIELD1: [],
+    FIELD2: [],
+    FIELD3: [],
+    FIELD4: []
+  })
   get form() {
     return this.colForm;
   }
-
+  get rowform() {
+    return this.rowForm
+  }
   constructor(private fb: FormBuilder, private gridService: GridService) { }
 
   @ViewChild('grid') grid!: any;
@@ -44,6 +53,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   toolbarOptions!: any[];
   editSettings!: EditSettingsModel;
   v = true;
+  dataType!: string
   scroll!: boolean
   number!: number
   contextMenuItems!: any[];
@@ -52,6 +62,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   @ViewChild('ejDialog') ejDialog!: DialogComponent;
   @ViewChild('chooseDialog') chooseDialog!: DialogComponent;
   @ViewChild('columnDialog') columnDialog!: DialogComponent;
+  @ViewChild('addRowDialog') addRowDialog!: DialogComponent
   @ViewChild('PlayerJersey') PlayerJersey!: CheckBoxComponent;
   @ViewChild('PlayerName') PlayerName!: CheckBoxComponent;
   @ViewChild('Year') Year!: CheckBoxComponent;
@@ -80,7 +91,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     { text: 'DelCol', target: '.e-headercell', id: 'delCol' },
     { text: 'ChooseCol', target: '.e-headercell', id: 'chooseCol' },
     { text: 'FreezeCol', target: '.e-headercell', id: 'freezeCol' },
-    { text: 'Filter', target: '.e-headercell', id: 'filter' },
+    { text: 'FilterCol', target: '.e-headercell', id: 'filter' },
     { text: 'MultiSorting', target: '.e-headercell', id: 'sorting' }
 
   ]
@@ -90,9 +101,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     { text: 'CutRow', target: '.e-row', id: 'cutRow' },
     { text: 'PasteNext', target: '.e-row', id: 'pasteNext' },
     { text: 'PasteChild', target: '.e-row', id: 'pasteChild' },
+    { text: 'AddNext', target: '.e-row', id: 'addNext' },
+    { text: 'AddChild', target: '.e-row', id: 'addNext' }
   ]
   ngOnInit(): void {
-
     dataSource();
     this.data = virtualData.slice(0, 50);
     this.toolbar = ['ColumnChooser'];
@@ -102,9 +114,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       { field: 'FIELD1', direction: 'Ascending' }]
     }
     this.editSettings = { allowEditing: true, allowAdding: true, allowDeleting: true, mode: 'Row' };
-    // this.toolbarOptions = ['Add', 'Edit', 'Delete', 'Update', 'Cancel', ];
     this.contextMenuItems = [...this.headerContextMenuItems, 'Edit', 'Delete', 'AddRow', ...this.rowContextMenuItems];
-    // this.contextMenuItems = [...this.headerContextMenuItems];
     this.show = false;
     this.customAttributes = {
       style: {
@@ -114,15 +124,15 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
     };
 
-  }
 
+  }
   contextMenuOpen(args: any): void {
     this.rowIndex = args.rowInfo.rowIndex;
     this.cellIndex = args.rowInfo.cellIndex;
     let list = document.getElementById('_gridcontrol_cmenu')
     let arr = Array.from(list?.children!)
     arr.forEach(e => {
-      if (['Filter', 'FreezeCol', 'MultiSorting', 'MultiSelect'].includes(e.innerHTML)) {
+      if (['FilterCol', 'FreezeCol', 'MultiSorting', 'MultiSelect'].includes(e.innerHTML)) {
         const inputEl = document.createElement('input');
         inputEl.type = "checkbox";
         inputEl.id = e.id;
@@ -130,51 +140,50 @@ export class AppComponent implements OnInit, AfterViewInit {
         e.prepend(inputEl)
       }
     })
+    if (args.event.target.className == 'e-headercelldiv' || args.event.target.className == 'e-headertext') {
+      let addRow = document.getElementById('_gridcontrol_cmenu_AddRow')
+      console.log(addRow);
+    }
   }
 
   private onEditCol(args: any) {
     this.columnDialog.show()
     this.colField = args.column.field
     this.headerText = args.column.headerText
-    this.textAlign = args.column.textAlign
+    this.textAlign = args.column.textAlign.toLowerCase()
+    this.dataType = args.column.type
   }
 
   private onSortCol(args: any) {
-    this.sort = args.event.target.checked;
+    let checked = this.onClickCheckBox(args)
+    this.sort = checked
   }
-
   private onDelCol(args: any) {
     const columnIndex = this.grid.columns.findIndex((value: any) => value.field == args.column.field);
     if(columnIndex === -1) return;
     DialogUtility.confirm('Column is deleted')
     this.grid.columns.splice(columnIndex, 1);
-
     this.grid.refreshColumns();
   }
 
   // Not Working
   onFreezeCol(args: any) {
-    // const isChecked = args.event.target.checked;
+    // this.v=false
+    // const isChecked = args.event.target.children[0].checked
     // this.scroll = isChecked;
     // this.number = isChecked ? 1 : 0;
-    if (args.event.target.checked) {
-      this.scroll = true
-      this.number = 1
-    }
-    else {
-      this.show = false
-      this.number = 0
-    }
   }
 
 
   contextMenuClick(args?: any): void {
+
     const isChecked = Boolean(args.event.target.checked);
     switch (args.item.id) {
       case 'editCol': {
         return this.onEditCol(args);
       }
       case 'sorting': {
+
         return this.onSortCol(args);
       }
       case 'newCol': {
@@ -190,48 +199,58 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
       // Not Working
       case 'freezeCol': {
+
         return this.onFreezeCol(args);
       }
       case 'filter': {
-        this.show = isChecked
+        let checked = this.onClickCheckBox(args)
+        this.show = checked
         return;
+
+      }
+      case 'addNext': {
+        this.addRowDialog.show()
+        break;
       }
       case 'multiSelect': {
-        this.selectOptions = { type: isChecked ? 'Multiple' : '' }
+        let checked = this.onClickCheckBox(args)
+        this.selectOptions = { type: checked ? 'Multiple' : 'Single' }
         return;
       }
       case 'cutRow': {
-        this.grid.copy()
+        this.copyRow(args)
         this.row = this.rowIndex
+
         this.cut = true
         break;
       }
       case 'copyRow': {
-        this.grid.copy()
-        this.row = this.rowIndex;
-        this.cut=false
-        // let row = this.grid.flatData[this.rowIndex] as HTMLTableElement
-        // console.log(row);
-        // row.style.background = '#336c12';
-        // // row.classList.add('bgcolor');
+        console.log(args.rowInfo);
+
+        this.copyRow(args)
+        this.row = this.rowIndex
+
+        this.cut = false
         break;
       }
       case 'pasteNext': {
-        this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
-        if (this.row && this.cut) this.grid.flatData.splice(this.row,1)
-        this.grid.refreshColumns();
+        if (this.row) {
+          this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
+          if (this.cut) {
+            this.grid.flatData.splice(this.row, 1)
+          }
+          this.grid.refreshColumns()
+        }
         break;
       }
       case 'pasteChild': {
-        if (this.row  && this.cut) {
-          this.grid.flatData[args.rowInfo.rowData.parentItem.index].Crew?.push(this.grid.flatData[this.row])
-          console.log(this.grid.flatData.splice(this.row,1));
-
+        if (this.row) {
+          this.grid.flatData[args.rowInfo.rowData.index]?.Crew?.push(this.grid.flatData[this.row])
           this.grid.refresh()
-        }
-        else{
-          this.grid.flatData[args.rowInfo.rowData.parentItem.index].Crew?.push(this.grid.flatData[this.row])
-          this.grid.refresh()
+          if (this.cut) {
+            this.grid.flatData.splice(this.row, 1)
+          }
+          this.grid.refreshColumns()
         }
         break;
       }
@@ -251,6 +270,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     console.log(event);
     // this.v = false;
 
+  }
+  onClickCheckBox(args: any) {
+    return args.event.target.children[0].checked = !args.event.target.children[0].checked
+  }
+  copyRow(args: any) {
+    let row = args.rowInfo.row
+    row.style.background = 'pink';
+    this.grid.copy()
   }
   sorting(args: any): void {
     console.log(args);
@@ -409,12 +436,6 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
   onCreateColumn() {
     this.gridService.createColumn(this.grid, this.ejDialog)
-    // let input: any = document.getElementById('colName');
-    // this.newColName = input.value;
-    // var obj = { field: "priority", headerText: this.newColName, width: 120 };
-    // this.grid.columns.push(obj as any);
-    // this.grid.refreshColumns();
-    // this.ejDialog.hide()
   }
   onCancel() {
     this.gridService.cancelDialog(this.ejDialog)
@@ -426,5 +447,14 @@ export class AppComponent implements OnInit, AfterViewInit {
     const {columns, grid, columnsCopy} = this;
     this.gridService.chooseColumn(event, {grid, columnsCopy, columns});
 
+  }
+  onAddRow() {
+    console.log(this.grid.flatData[2]);
+    if (this.rowIndex) {
+      this.grid.flatData.splice(this.rowIndex + 1, 0, this.rowForm.value)
+      this.grid.refreshColumns()
+    }
+  }
+  onCancelRow() {
   }
 }

@@ -1,7 +1,7 @@
 import { NgModule,ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
+import { ButtonModule, CheckBoxModule } from '@syncfusion/ej2-angular-buttons';
 import { MultiSelectModule } from '@syncfusion/ej2-angular-dropdowns';
 import { ContextMenuModule } from '@syncfusion/ej2-angular-navigations';
 import { DialogModule } from '@syncfusion/ej2-angular-popups';
@@ -20,7 +20,7 @@ import { AppComponent } from './app.component';
         ReactiveFormsModule,
     ContextMenuModule,
     ButtonModule,
-   
+   CheckBoxModule
     ],
     declarations: [AppComponent],
     bootstrap: [AppComponent]
