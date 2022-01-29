@@ -46,7 +46,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
   columns = COLUMNS
   columnsCopy = [...this.columns]
-  data: Object[] | undefined;
+  data: any[] | undefined;
   toolbar: string[] | undefined;
   infiniteScrollSettings!: Object;
   selectOptions!: Object;
@@ -104,7 +104,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     { text: 'CutRow', target: '.e-row', id: 'cutRow' },
     { text: 'PasteNext', target: '.e-row', id: 'pasteNext' },
     { text: 'PasteChild', target: '.e-row', id: 'pasteChild' },
-   
+
   ]
   ngOnInit(): void {
     dataSource();
@@ -157,8 +157,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   private onSortCol(args: any) {
-    let checked = this.onClickCheckBox(args)
-    this.sort = checked
+    // let checked = this.onClickCheckBox(args)
+    this.sort = args.event.target.checked
   }
   private onDelCol(args: any) {
     const columnIndex = this.grid.columns.findIndex((value: any) => value.field == args.column.field);
@@ -205,8 +205,8 @@ export class AppComponent implements OnInit, AfterViewInit {
         return this.onFreezeCol(args);
       }
       case 'filter': {
-        let checked = this.onClickCheckBox(args)
-        this.show = checked
+        // let checked = this.onClickCheckBox(args)
+        this.show = isChecked
         return;
 
       }
@@ -221,28 +221,24 @@ export class AppComponent implements OnInit, AfterViewInit {
         break;
       }
       case 'multiSelect': {
-        let checked = this.onClickCheckBox(args)
-        this.selectOptions = { type: checked ? 'Multiple' : 'Single' }
+        // let checked = this.onClickCheckBox(args)
+        this.selectOptions = { type: isChecked ? 'Multiple' : 'Single' }
         return;
       }
       case 'cutRow': {
         this.copyRow(args)
         this.row = this.rowIndex
-
         this.cut = true
         break;
       }
       case 'copyRow': {
-        console.log(args.rowInfo);
-
         this.copyRow(args)
         this.row = this.rowIndex
-
         this.cut = false
         break;
       }
       case 'pasteNext': {
-        if (this.row) {
+        if (this.row>=0) {
           this.grid.flatData.splice(this.rowIndex + 1, 0, this.grid.flatData[this.row])
           if (this.cut) {
             this.grid.flatData.splice(this.row, 1)
@@ -253,10 +249,24 @@ export class AppComponent implements OnInit, AfterViewInit {
       }
       case 'pasteChild': {
         if (this.row) {
-          this.grid.flatData[args.rowInfo.rowData.parentItem.index]?.Crew?.push(this.grid.flatData[this.row])
+          let parentIndex = args.rowInfo.rowData.parentItem?.index
+          if (parentIndex>=0) {
+            this.grid.flatData[this.rowIndex].parentItem.taskData.Crew?.push(this.grid.flatData[this.row]);
+          }
+          else {
+            this.grid.flatData[this.rowIndex].Crew.push(this.grid.flatData[this.row])
+          }
           this.grid.refresh()
           if (this.cut) {
+            this.grid.refreshColumns()
+            this.grid.refresh()
             this.grid.flatData.splice(this.row, 1)
+            const index = this.grid.flatData[this.row].parentItem.index
+            let cutIndex = this.data![index].Crew.findIndex((e: any) => {
+              return e.TaskID === this.grid.flatData[this.row].TaskID
+            });
+            if (cutIndex == -1) return
+            this.data![index].Crew.splice(cutIndex,1)
           }
           this.grid.refreshColumns()
         }
@@ -279,9 +289,9 @@ export class AppComponent implements OnInit, AfterViewInit {
     // this.v = false;
 
   }
-  onClickCheckBox(args: any) {
-    return args.event.target.children[0].checked = !args.event.target.children[0].checked
-  }
+  // onClickCheckBox(args: any) {
+  //   return args.event.target.children[0].checked = !args.event.target.children[0].checked
+  // }
   copyRow(args: any) {
     let row = args.rowInfo.row
     row.style.background = 'pink';
@@ -318,8 +328,8 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   // Multi sorting No working
-  onClick(event: any) {
-    const { checked, value } = event.target;
+  onClick(event: any, ele?: any) {
+    const { checked, value } = ele;
     if (checked) {
       this.grid.sortByColumn(value, 'Ascending', true);
     } else {
