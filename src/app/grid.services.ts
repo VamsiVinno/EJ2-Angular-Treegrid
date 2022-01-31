@@ -5,24 +5,25 @@ import { TreeGridComponent } from "@syncfusion/ej2-angular-treegrid";
     providedIn: 'root'
 })
 export class GridService {
-
     cancelDialog(dialog: any) {
         dialog.hide()
     }
-    createColumn(grid:TreeGridComponent,dialog:any) {
+    createColumn(grid:TreeGridComponent,dialog:any,columnsCopy:any) {
         let input: any = document.getElementById('colName');
     let newColName = input.value;
-        var obj = { field: "priority", headerText: newColName, width: 120 };
+        var obj = { field: "priority", headerText: newColName, width: 120,checked:true };
         grid.columns.push(obj as any);
+        columnsCopy.push(obj as any)
        grid.refreshColumns();
         dialog.hide()
+        input.value=''
       }
-    chooseColumn(event: any, {columns, grid, columnsCopy}: {columns: any, grid: TreeGridComponent, columnsCopy: any}) {
+    chooseColumn(event: any, { grid, columnsCopy}: { grid: TreeGridComponent, columnsCopy: any}) {
         let checkedColumns = []
         checkedColumns.push(event.target.value)
         if (event.target.checked == false) {
             checkedColumns.forEach(e => {
-                columns.forEach((f: any) => {
+                grid.columns.forEach((f: any) => {
                     if (e === f.field) {
                         grid.hideColumns([f.field, f.headerText]);
                     }

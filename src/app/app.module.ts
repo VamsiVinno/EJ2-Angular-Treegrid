@@ -12,6 +12,7 @@ import {
     DatePickerModule,
 } from '@syncfusion/ej2-angular-calendars';
 import { NumericTextBoxAllModule } from '@syncfusion/ej2-angular-inputs';
+import { CommonModule } from '@angular/common';
 /**
  * Module
  */
@@ -35,7 +36,7 @@ import { NumericTextBoxAllModule } from '@syncfusion/ej2-angular-inputs';
         NumericTextBoxAllModule,
         DatePickerModule,
         SparklineAllModule,
-
+        CommonModule,
     ],
     declarations: [AppComponent],
     bootstrap: [AppComponent]
