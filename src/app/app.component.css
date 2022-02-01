@@ -20,3 +20,6 @@
 .display{
 display: none !important;;
 }
+.e-grid .e-focused:not(.e-menu-item) {
+  box-shadow: 0 
+}

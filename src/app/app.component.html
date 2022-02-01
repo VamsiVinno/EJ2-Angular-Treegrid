@@ -1,9 +1,14 @@
-<ejs-treegrid [dataSource]="data" [enableVirtualization]="v" height="291" childMapping="Crew"
+<div>
+  <div style="right: 4%;">
+    <input type="checkbox" id="draganddrop" class="mr-2 " (change)="onDragandDrop($event)">
+<label for="draganddrop">Enable Drag and Drop</label>
+  </div>
+<ejs-treegrid [dataSource]="data" [enableVirtualization]="false" height="291" childMapping="Crew"
   [infiniteScrollSettings]="infiniteScrollSettings" [showColumnChooser]="show" [treeColumnIndex]="1"
-  [allowFiltering]="show" [allowRowDragAndDrop]="true" [selectionSettings]="selectOptions" [editSettings]="editSettings"
-  (rowDrag)="onDrag($event)" (rowDrop)="onDrop($event)" [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
-  (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" [enableInfiniteScrolling]="scroll"
-  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings"   #grid>
+  [allowFiltering]="show" [allowRowDragAndDrop]="allowDragandDrop" [selectionSettings]="selectOptions" [editSettings]="editSettings"
+  (rowDragStart)="onDrag($event)"  [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
+  (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" [enableInfiniteScrolling]="true"
+  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings"   #grid >
   <e-columns>
     <e-column
       field="{{ item.field }}"
@@ -283,4 +288,5 @@
       </tr>
     </table>
   </div>
+</div>
 </div>
