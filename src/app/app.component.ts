@@ -9,6 +9,8 @@ import { COLUMNS } from './columns.constant';
 import { GridService } from './grid.services';
 import { CheckBoxComponent } from '@syncfusion/ej2-angular-buttons';
 import { ColumnMenu, RowMenu } from './menu.constant';
+import { CacheAdaptor, DataManager, ODataAdaptor, UrlAdaptor, WebApiAdaptor, WebMethodAdaptor } from '@syncfusion/ej2-data';
+import { isNullOrUndefined } from '@syncfusion/ej2-base/src/util';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -151,11 +153,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   onFreezeCol(args: any) {
     console.log(this.grid.columns[0]);
     
-    // const isChecked = args.event.target.checked
-    // this.v=!isChecked
-    // this.scroll = isChecked;
-    // this.number = isChecked ? 1 : 0;
-
+    const isChecked = args.event.target.checked
+    this.v=!isChecked
+    this.scroll = isChecked;
+    this.number = isChecked ? 1 : 0;
   }
 
 
@@ -256,33 +257,188 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // TreeGrid.prototype.getRowByIndex = getRowByIndex.bind(this)
-    // function getRowByIndex(this: any, index: number) {
-    //   console.log(this.grid.getDataRows().filter((e: any) => parseInt(e.getAttribute('aria-rowindex'), 10) === index)[0])
-    //   return this.grid.getDataRows().filter((e: any) => parseInt(e.getAttribute('aria-rowindex'), 10) === index)[0] || {
-    //     getAttribute: (data: boolean) => false
-    //   };
-    // }
-    // console.log(TreeGrid)
-    // console.log(this.grid)
-
+    TreeGrid.prototype.getRowByIndex = getRowByIndex.bind(this)
+    function getRowByIndex(this: any, index: number) {
+      return this.grid.getDataRows().filter((e: any) => e.rowIndex === index)[0] || {
+        getAttribute: (data: boolean) => false
+      };
+    }
+    console.log(this.grid);
+    setTimeout(() => {
+      this.grid.rowDragAndDropModule.__proto__.dropRows = this.dropRows.bind(this);
+    })
   }
+
+
+
+  dropRows(this: any, args: any, isByMethod: any) {
+    console.log(args);
+    const grid = this.grid;
+    const thisRow = this.grid.rowDragAndDropModule;
+
+    function isRemoteData() {
+      if (grid.dataSource instanceof DataManager) {
+          const adaptor = grid.dataSource.adaptor;
+          return (adaptor instanceof ODataAdaptor ||
+              (adaptor instanceof WebApiAdaptor) || (adaptor instanceof WebMethodAdaptor) ||
+              (adaptor instanceof CacheAdaptor) || adaptor instanceof UrlAdaptor);
+      }
+      return false;
+    }
+    if (thisRow.dropPosition !== 'Invalid' && !isRemoteData()) {
+      const tObj = grid;
+      let draggedRecord: any;
+      let droppedRecord;
+      if (isNullOrUndefined(args.dropIndex)) {
+          const rowIndex = tObj.getSelectedRowIndexes()[0] - 1;
+          const record = tObj.getCurrentViewRecords()[rowIndex];
+          thisRow.getParentData(record);
+      }
+      else {
+          args.dropIndex = args.dropIndex === args.fromIndex ? thisRow.getTargetIdx(args.target.parentElement) : args.dropIndex;
+          thisRow.droppedRecord = tObj.getCurrentViewRecords().find((e: any) => e.TaskID === args.dropIndex);
+      }
+      let dragRecords = [];
+      droppedRecord = thisRow.droppedRecord;
+      if (!args.data[0]) {
+          dragRecords.push(args.data);
+      }
+      else {
+          dragRecords = args.data;
+      }
+      let count = 0;
+      const multiplegrid = grid.rowDropSettings.targetID;
+      thisRow.isMultipleGrid = multiplegrid;
+      if (!multiplegrid) {
+          thisRow.ensuredropPosition(dragRecords, droppedRecord);
+      }
+      else {
+          thisRow.isaddtoBottom = multiplegrid && thisRow.isDraggedWithChild;
+      }
+      const dragLength = dragRecords.length;
+      if (!isNullOrUndefined(grid.idMapping)) {
+          dragRecords.reverse();
+      }
+      for (let i = 0; i < dragLength; i++) {
+          draggedRecord = dragRecords[i];
+          thisRow.draggedRecord = draggedRecord;
+          if (thisRow.dropPosition !== 'Invalid') {
+              if (!tObj.rowDropSettings.targetID || isByMethod) {
+                  thisRow.deleteDragRow();
+              }
+              if (thisRow.draggedRecord === thisRow.droppedRecord) {
+                  let correctIndex = thisRow.getTargetIdx(args.target.offsetParent.parentElement);
+                  if (isNaN(correctIndex)) {
+                      correctIndex = thisRow.getTargetIdx(args.target.parentElement);
+                  }
+                  args.dropIndex = correctIndex;
+                  droppedRecord = thisRow.droppedRecord = grid.getCurrentViewRecords()[args.dropIndex];
+              }
+              if (droppedRecord.parentItem || thisRow.dropPosition === 'middleSegment') {
+                  const parentRecords = tObj.parentData;
+                  const newParentIndex = parentRecords.indexOf(thisRow.draggedRecord);
+                  if (newParentIndex !== -1) {
+                      parentRecords.splice(newParentIndex, 1);
+                  }
+              }
+              const recordIndex1 = thisRow.treeGridData.indexOf(droppedRecord);
+              thisRow.dropAtTop(recordIndex1);
+              if (thisRow.dropPosition === 'bottomSegment') {
+                  if (!droppedRecord.hasChildRecords) {
+                      if (grid.parentIdMapping) {
+                          thisRow.treeData.splice(recordIndex1 + 1, 0, thisRow.draggedRecord.taskData);
+                      }
+                      thisRow.treeGridData.splice(recordIndex1 + 1, 0, thisRow.draggedRecord);
+                  }
+                  else {
+                      count = thisRow.getChildCount(droppedRecord, 0);
+                      if (grid.parentIdMapping) {
+                          thisRow.treeData.splice(recordIndex1 + count + 1, 0, thisRow.draggedRecord.taskData);
+                      }
+                      thisRow.treeGridData.splice(recordIndex1 + count + 1, 0, thisRow.draggedRecord);
+                  }
+                  if (isNullOrUndefined(droppedRecord.parentItem)) {
+                      delete draggedRecord.parentItem;
+                      draggedRecord.level = 0;
+                      if (grid.parentIdMapping) {
+                          draggedRecord[grid.parentIdMapping] = null;
+                      }
+                  }
+                  if (droppedRecord.parentItem) {
+                      const rec = thisRow.getChildrecordsByParentID(droppedRecord.parentUniqueID);
+                      const childRecords = rec[0].childRecords;
+                      const droppedRecordIndex = childRecords.indexOf(droppedRecord) + 1;
+                      childRecords.splice(droppedRecordIndex, 0, draggedRecord);
+                      draggedRecord.parentItem = droppedRecord.parentItem;
+                      draggedRecord.parentUniqueID = droppedRecord.parentUniqueID;
+                      if (grid.parentIdMapping) {
+                          draggedRecord[grid.parentIdMapping] = droppedRecord[grid.parentIdMapping];
+                          draggedRecord.parentItem = droppedRecord.parentItem;
+                          draggedRecord.level = droppedRecord.level;
+                      }
+                  }
+                  if (draggedRecord.hasChildRecords) {
+                      const level = 1;
+                      thisRow.updateChildRecordLevel(draggedRecord, level);
+                      thisRow.updateChildRecord(draggedRecord, recordIndex1 + count + 1);
+                  }
+              }
+              thisRow.dropMiddle(recordIndex1);
+          }
+          if (isNullOrUndefined(draggedRecord.parentItem)) {
+              const parentRecords = tObj.parentData;
+              const newParentIndex = parentRecords.indexOf(thisRow.droppedRecord);
+              let nonRepeat = 0;
+              parentRecords.filter((e: any) => {
+                  if (draggedRecord.uniqueID === e.uniqueID) {
+                      nonRepeat++;
+                  }
+              });
+              if (thisRow.dropPosition === 'bottomSegment' && nonRepeat === 0) {
+                  parentRecords.splice(newParentIndex + 1, 0, draggedRecord);
+              }
+              else if (thisRow.dropPosition === 'topSegment' && nonRepeat === 0) {
+                  parentRecords.splice(newParentIndex, 0, draggedRecord);
+              }
+          }
+          tObj.rowDragAndDropModule.refreshGridDataSource();
+      }
+  }
+
+    console.log('thisRow ->', this);
+}
+
+
+
+
+
+
+
+
   onDrag(event: any) {
-    console.log(event);
+    // console.log(event);
     // this.v = false;
-    console.log(event.data[0].index);
+    // console.log(event.originalEvent.event.preventDefault());
+    var a = event.data[0].index;
+    //  var b = this.obj2;
+    //  this.obj1 = b;
+    //  this.obj2 = a;
+  }
+  onDragStart(event: any) {
+    // this.v = false;
+    // console.log(event.originalEvent);
     var a = event.data[0].index;
     //  var b = this.obj2;
     //  this.obj1 = b;
     //  this.obj2 = a;
   }
   onDrop(event:any){
-    console.log(event);
-    var a = this.grid.flatData[event.fromIndex]
-     var b = this.grid.flatData[event.dropIndex]
-     this.grid.flatData[event.fromIndex]= b;
-     this.grid.flatData[event.dropIndex]= a;
-    this.grid.refreshColumns()
+    // console.log(event);
+    // var a = this.grid.flatData[event.fromIndex]
+    //  var b = this.grid.flatData[event.dropIndex]
+    //  this.grid.flatData[event.fromIndex]= b;
+    //  this.grid.flatData[event.dropIndex]= a;
+    // this.grid.refreshColumns()
   }
   // onClickCheckBox(args: any) {
   //   return args.event.target.children[0].checked = !args.event.target.children[0].checked
