@@ -3,7 +3,7 @@
   [allowFiltering]="show" [allowRowDragAndDrop]="true" [selectionSettings]="selectOptions" [editSettings]="editSettings"
   (rowDrag)="onDrag($event)" (rowDrop)="onDrop($event)" [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
   (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" [enableInfiniteScrolling]="scroll"
-  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings" #grid>
+  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings"   #grid>
   <e-columns>
     <e-column field="{{ item.field }}" headerText="{{ item.headerText }}" width="120" textAlign="Right" 
       *ngFor="let item of columns" fontSize="50" (columnMenuClick)="onDrag($event)"></e-column>
