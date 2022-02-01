@@ -89,6 +89,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   private addChildIndex!: number
   private headerContextMenuItems = ColumnMenu
   private rowContextMenuItems = RowMenu
+  private checked!:boolean
   ngOnInit(): void {
     dataSource();
     this.data = virtualData.slice(0, 50);
@@ -118,15 +119,14 @@ export class AppComponent implements OnInit, AfterViewInit {
       if (['FilterCol', 'FreezeCol', 'MultiSorting', 'MultiSelect'].includes(e.innerHTML)) {
         const inputEl = document.createElement('input');
         inputEl.type = "checkbox";
-        inputEl.id = e.id;
+        inputEl.id = e.id + 'Checkbox';
         inputEl.style.marginRight = '5px'
+        if(inputEl.id=='freezeColCheckbox'){
+          inputEl.checked=this.checked
+        }
         e.prepend(inputEl)
       }
     })
-    // if (args.event.target.className == 'e-headercelldiv' || args.event.target.className == 'e-headertext') {
-    //   let addRow = document.getElementById('_gridcontrol_cmenu_AddRow')
-    //   console.log(addRow);
-    // }
   }
 
   private onEditCol(args: any) {
@@ -151,12 +151,13 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   // Not Working
   onFreezeCol(args: any) {
-    console.log(this.grid.columns[0]);
+    console.log(args.column.index);
     
     const isChecked = args.event.target.checked
-    this.v=!isChecked
+    this.v = !isChecked
     this.scroll = isChecked;
-    this.number = isChecked ? 1 : 0;
+    this.number = isChecked ? args.column.index+1 : 0;
+    this.checked=isChecked
   }
 
 
@@ -540,7 +541,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     })
   }
   onCreateColumn() {
-    this.gridService.createColumn(this.grid, this.ejDialog,this.columnsCopy)
+    this.gridService.createColumn(this.grid, this.ejDialog, this.columnsCopy)
   }
   onCancel() {
     this.gridService.cancelDialog(this.ejDialog)
@@ -549,7 +550,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.gridService.cancelDialog(this.columnDialog)
   }
   onChooseColumn(event: any) {
-    const {  grid, columnsCopy } = this;
+    const { grid, columnsCopy } = this;
     this.gridService.chooseColumn(event, { grid, columnsCopy });
   }
   onAddRow() {

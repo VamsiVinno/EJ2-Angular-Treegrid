@@ -1,29 +1,9 @@
-<ejs-treegrid
-  [dataSource]="data"
-  [enableVirtualization]="v"
-  height="291"
-  childMapping="Crew"
-  [infiniteScrollSettings]="infiniteScrollSettings"
-  [showColumnChooser]="show"
-  [treeColumnIndex]="1"
-  [allowFiltering]="show"
-  [allowRowDragAndDrop]="true"
-  [selectionSettings]="selectOptions"
-  [editSettings]="editSettings"
-  (rowDrag)="onDrag($event)"
-  (rowDrop)="onDrop($event)"
-  (rowDragStart)="onDragStart($event)"
-  [contextMenuItems]="contextMenuItems"
-  (contextMenuOpen)="contextMenuOpen($event)"
-  (contextMenuClick)="contextMenuClick($event)"
-  (actionComplete)="sorting($event)"
-  [enableInfiniteScrolling]="scroll"
-  [treeColumnIndex]="0"
-  [allowSorting]="sort"
-  [frozenColumns]="number"
-  [sortSettings]="sortSettings"
-  #grid
->
+<ejs-treegrid [dataSource]="data" [enableVirtualization]="v" height="291" childMapping="Crew"
+  [infiniteScrollSettings]="infiniteScrollSettings" [showColumnChooser]="show" [treeColumnIndex]="1"
+  [allowFiltering]="show" [allowRowDragAndDrop]="true" [selectionSettings]="selectOptions" [editSettings]="editSettings"
+  (rowDrag)="onDrag($event)" (rowDrop)="onDrop($event)" [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
+  (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" [enableInfiniteScrolling]="scroll"
+  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings"   #grid>
   <e-columns>
     <e-column
       field="{{ item.field }}"
