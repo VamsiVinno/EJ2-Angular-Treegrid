@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { TreeGridComponent } from "@syncfusion/ej2-angular-treegrid";
+import { TreeGrid, TreeGridComponent } from "@syncfusion/ej2-angular-treegrid";
 
 @Injectable({
     providedIn: 'root'
@@ -8,7 +8,7 @@ export class GridService {
     cancelDialog(dialog: any) {
         dialog.hide()
     }
-    createColumn(grid:TreeGridComponent,dialog:any,columnsCopy:any) {
+    createColumn(grid:TreeGrid,dialog:any,columnsCopy:any) {
         let input: any = document.getElementById('colName');
     let newColName = input.value;
         var obj = { field: "priority", headerText: newColName, width: 120,checked:true };
@@ -18,7 +18,7 @@ export class GridService {
         dialog.hide()
         input.value=''
       }
-    chooseColumn(event: any, { grid, columnsCopy}: { grid: TreeGridComponent, columnsCopy: any}) {
+    chooseColumn(event: any, { grid, columnsCopy}: { grid: TreeGrid, columnsCopy: any}) {
         let checkedColumns = []
         checkedColumns.push(event.target.value)
         if (event.target.checked == false) {
