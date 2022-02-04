@@ -16,7 +16,7 @@ export function dropRows(this: any, args: any, isByMethod: any) {
     }
     return false;
   }
-  thisRow.dropPosition = thisRow.dropPosition || 'bottomSegment';
+  thisRow.dropPosition = 'bottomSegment';
   if (thisRow.dropPosition !== 'Invalid' && !isRemoteData()) {
     const tObj = grid;
     let draggedRecord: any;
@@ -30,6 +30,7 @@ export function dropRows(this: any, args: any, isByMethod: any) {
       const row = args.target.parentElement.children[1] || args.target.parentElement.parentElement.children[1];
       // args.dropIndex = args.dropIndex === args.fromIndex ? thisRow.getTargetIdx(args.target.parentElement) : args.dropIndex;
       args.dropIndex = parseInt(row?.innerText || '0');
+      // TODO: Pass id key to this function and replace with hardcoded TaskID.
       thisRow.droppedRecord = tObj.getCurrentViewRecords().find((e: any) => e.TaskID === args.dropIndex);
       thisRow.draggedRecord
     }
@@ -57,9 +58,16 @@ export function dropRows(this: any, args: any, isByMethod: any) {
     for (let i = 0; i < dragLength; i++) {
       draggedRecord = dragRecords[i];
       thisRow.draggedRecord = draggedRecord;
+      const rec = thisRow.getChildrecordsByParentID(droppedRecord.parentUniqueID);
+      const childRecords = rec[0].childRecords;
+      const draggedRecordIndex = childRecords.indexOf(draggedRecord);
+      childRecords.splice(draggedRecordIndex, 1);
       if (thisRow.dropPosition !== 'Invalid') {
         if (!tObj.rowDropSettings.targetID || isByMethod) {
           tObj.flatData.splice(args.fromIndex, 1);
+          const first = tObj.flatData.findIndex((e: any) => e.parentItem?.index == args.fromIndex)
+          const last = tObj.flatData.findLastIndex((e: any) => e.parentItem?.index == args.fromIndex)
+          tObj.flatData.splice(first, last + 1);
           thisRow.treeGridData = tObj.flatData;
         }
         if (thisRow.draggedRecord === thisRow.droppedRecord) {
@@ -104,8 +112,6 @@ export function dropRows(this: any, args: any, isByMethod: any) {
             }
           }
           if (droppedRecord.parentItem) {
-            const rec = thisRow.getChildrecordsByParentID(droppedRecord.parentUniqueID);
-            const childRecords = rec[0].childRecords;
             const droppedRecordIndex = childRecords.indexOf(droppedRecord) + 1;
             childRecords.splice(droppedRecordIndex, 0, draggedRecord);
             draggedRecord.parentItem = droppedRecord.parentItem;
