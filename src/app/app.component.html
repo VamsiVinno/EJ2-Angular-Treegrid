@@ -1,8 +1,9 @@
-<div class="row">
-  <div [ngClass]="sort?'col-lg-9':'col-lg-12'">
+<div class="container-fluid">
 
+<div class="row">
+  <div [ngClass]="sort?'col-9':'col-12'" >
 <ejs-treegrid [dataSource]="data" [enableVirtualization]="v" height="291" childMapping="Crew"  
-  [infiniteScrollSettings]="infiniteScrollSettings" [showColumnChooser]="show" [treeColumnIndex]="1"
+  [infiniteScrollSettings]="infiniteScrollSettings" [showColumnChooser]="show" 
   [allowFiltering]="show" [allowRowDragAndDrop]="true" [selectionSettings]="selectOptions" [editSettings]="editSettings"
     [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
   (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" (rowDrop)="onDrop($event)"
@@ -11,7 +12,7 @@
     <e-column
       field="{{ item.field }}"
       headerText="{{ item.headerText }}"
-      width="120"
+      width="150"
       textAlign="Right"
       *ngFor="let item of columns"
       fontSize="50"
@@ -286,5 +287,6 @@
       </tr>
     </table>
   </div>
+</div>
 </div>
 </div>

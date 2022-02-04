@@ -4,20 +4,19 @@ import { VirtualScrollService, TreeGridComponent, ColumnChooserService, ToolbarS
 import { dataSource, virtualData } from './data';
 import { DialogUtility } from '@syncfusion/ej2-popups';
 import { FormBuilder } from '@angular/forms';
-import { Alignments, Types } from './type.constant';
-import { COLUMNS } from './columns.constant';
-import { GridService } from './grid.services';
+import { Alignments, Types } from './constants.constant'
+import { COLUMNS } from './constants.constant';
 import { CheckBoxComponent } from '@syncfusion/ej2-angular-buttons';
-import { ColumnMenu, RowMenu } from './menu.constant';
-import { CacheAdaptor, DataManager, ODataAdaptor, UrlAdaptor, WebApiAdaptor, WebMethodAdaptor } from '@syncfusion/ej2-data';
+import { ColumnMenu, RowMenu } from './constants.constant';
 import { dropRows, isNullOrUndefined } from './utils/grid.util';
+import { cancelDialog, chooseColumn, createColumn, editColumn } from './utils/services.util';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   providers: [VirtualScrollService, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService,
     RowDDService, SelectionService, EditService, ContextMenuService, PageService, InfiniteScrollService,AggregateService]
 })
-export class AppComponent implements OnInit, AfterViewInit, OnChanges {
+export class AppComponent implements OnInit, AfterViewInit {
   colForm = this.fb.group({
     name: [],
     size: [],
@@ -39,7 +38,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
   get rowform() {
     return this.rowForm
   }
-  constructor(private fb: FormBuilder, private gridService: GridService) { }
+  constructor(private fb: FormBuilder) { }
   @ViewChild('grid') grid!: TreeGrid;
   newColName!: any
   hideDialog: any = () => {
@@ -249,8 +248,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     }
 
   }
-  ngOnChanges() {
-  }
   ngAfterViewInit() {
     TreeGrid.prototype.getRowByIndex = getRowByIndex.bind(this)
     function getRowByIndex(this: any, index: number) {
@@ -258,7 +255,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
         getAttribute: (data: boolean) => false
       };
     }
-    console.log(this.grid);
     setTimeout(() => {
       (this.grid.rowDragAndDropModule as any).__proto__.dropRows = dropRows.bind(this);
     }, 200)
@@ -318,7 +314,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
   }
   onEditColumn() {
     const { grid, form, customAttributes, colField, columnDialog } = this;
-    this.gridService.editColumn({ grid, form, customAttributes, colField, columnDialog })
+    editColumn({ grid, form, customAttributes, colField, columnDialog })
     this.customAttributes = {
       style: {
         background: '',
@@ -328,17 +324,17 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     };
   }
   onCreateColumn() {
-    this.gridService.createColumn(this.grid, this.ejDialog, this.columnsCopy)
+   createColumn(this.grid, this.ejDialog, this.columnsCopy)
   }
   onCancel() {
-    this.gridService.cancelDialog(this.ejDialog)
+    cancelDialog(this.ejDialog)
   }
   onEditCancel() {
-    this.gridService.cancelDialog(this.columnDialog)
+    cancelDialog(this.columnDialog)
   }
   onChooseColumn(event: any) {
     const { grid, columnsCopy } = this;
-    this.gridService.chooseColumn(event, { grid, columnsCopy });
+    chooseColumn(event, { grid, columnsCopy });
   }
   pushRow(index: number) {
     (this.grid.flatData[index] as any)?.taskData.Crew?.push(this.rowForm.value);
@@ -365,8 +361,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
   onCancelRow() {
-    this.gridService.cancelDialog(this.addRowDialog)
+   cancelDialog(this.addRowDialog)
   }
-
-
 }
