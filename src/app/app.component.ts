@@ -349,7 +349,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
         thisRow.draggedRecord = draggedRecord;
         if (thisRow.dropPosition !== 'Invalid') {
           if (!tObj.rowDropSettings.targetID || isByMethod) {
-            thisRow.deleteDragRow();
+            tObj.flatData.splice(args.fromIndex, 1);
+            thisRow.treeGridData = tObj.flatData;
           }
           if (thisRow.draggedRecord === thisRow.droppedRecord) {
             let correctIndex = thisRow.getTargetIdx(args.target.offsetParent.parentElement);
