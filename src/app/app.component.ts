@@ -14,7 +14,7 @@ import { cancelDialog, chooseColumn, createColumn, editColumn } from './utils/se
   selector: 'app-root',
   templateUrl: './app.component.html',
   providers: [VirtualScrollService, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService,
-    RowDDService, SelectionService, EditService, ContextMenuService, PageService, InfiniteScrollService,AggregateService]
+    RowDDService, SelectionService, EditService, ContextMenuService, PageService, InfiniteScrollService, AggregateService]
 })
 export class AppComponent implements OnInit, AfterViewInit {
   colForm = this.fb.group({
@@ -324,7 +324,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     };
   }
   onCreateColumn() {
-   createColumn(this.grid, this.ejDialog, this.columnsCopy)
+    createColumn(this.grid, this.ejDialog, this.columnsCopy)
   }
   onCancel() {
     cancelDialog(this.ejDialog)
@@ -361,6 +361,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     }
   }
   onCancelRow() {
-   cancelDialog(this.addRowDialog)
+    cancelDialog(this.addRowDialog)
   }
 }

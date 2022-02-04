@@ -88,8 +88,6 @@ export function dropRows(this: any, args: any, isByMethod: any) {
         }
         const recordIndex1 = thisRow.treeGridData.indexOf(droppedRecord);
         thisRow.dropAtTop(recordIndex1);
-        console.log(thisRow.dropPosition);
-
         if (thisRow.dropPosition === 'bottomSegment') {
           if (!droppedRecord.hasChildRecords) {
             if (grid.parentIdMapping) {
