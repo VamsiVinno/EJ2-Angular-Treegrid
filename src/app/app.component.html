@@ -1,14 +1,12 @@
-<div>
-  <div style="right: 4%;">
-    <input type="checkbox" id="draganddrop" class="mr-2 " (change)="onDragandDrop($event)">
-<label for="draganddrop">Enable Drag and Drop</label>
-  </div>
-<ejs-treegrid [dataSource]="data" [enableVirtualization]="v" height="291" childMapping="Crew"
+<div class="row">
+  <div [ngClass]="sort?'col-lg-9':'col-lg-12'">
+
+<ejs-treegrid [dataSource]="data" [enableVirtualization]="v" height="291" childMapping="Crew"  
   [infiniteScrollSettings]="infiniteScrollSettings" [showColumnChooser]="show" [treeColumnIndex]="1"
   [allowFiltering]="show" [allowRowDragAndDrop]="true" [selectionSettings]="selectOptions" [editSettings]="editSettings"
-  (rowDragStart)="onDrag($event)"  [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
-  (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)"
-  [treeColumnIndex]='0' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings"   #grid >
+    [contextMenuItems]="contextMenuItems" (contextMenuOpen)="contextMenuOpen($event)"
+  (contextMenuClick)="contextMenuClick($event)" (actionComplete)="sorting($event)" (rowDrop)="onDrop($event)"
+  [treeColumnIndex]='1' [allowSorting]="sort" [frozenColumns]="number" [sortSettings]="sortSettings"   #grid >
   <e-columns>
     <e-column
       field="{{ item.field }}"
@@ -205,9 +203,10 @@
     </form>
   </ng-template>
 </ejs-dialog>
-<div class="col-lg-3 property-section" *ngIf="sort">
-  <div class="property-panel-section">
-    <div class="property-panel-header">Properties</div>
+</div>
+
+<div class="col-lg-2 border border-secondary text-center" *ngIf="sort">
+  <div class="mt-5">
     <table
       id="property"
       class="property-panel-table"

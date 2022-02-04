@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewEncapsulation, ViewChild, ElementRef, AfterViewInit, OnChanges } from '@angular/core';
 import { DialogComponent } from '@syncfusion/ej2-angular-popups';
-import { VirtualScrollService, TreeGridComponent, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService, RowDDService, SelectionService, EditSettingsModel, ToolbarItems, EditService, ContextMenuService, PageService, LoggerService, InfiniteScrollService, TreeGrid } from '@syncfusion/ej2-angular-treegrid';
+import { VirtualScrollService, TreeGridComponent, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService, RowDDService, SelectionService, EditSettingsModel, ToolbarItems, EditService, ContextMenuService, PageService, LoggerService, InfiniteScrollService, TreeGrid, AggregateService } from '@syncfusion/ej2-angular-treegrid';
 import { dataSource, virtualData } from './data';
 import { DialogUtility } from '@syncfusion/ej2-popups';
 import { FormBuilder } from '@angular/forms';
@@ -10,12 +10,12 @@ import { GridService } from './grid.services';
 import { CheckBoxComponent } from '@syncfusion/ej2-angular-buttons';
 import { ColumnMenu, RowMenu } from './menu.constant';
 import { CacheAdaptor, DataManager, ODataAdaptor, UrlAdaptor, WebApiAdaptor, WebMethodAdaptor } from '@syncfusion/ej2-data';
-import { isNullOrUndefined } from './utils/grid.util';
+import { dropRows, isNullOrUndefined } from './utils/grid.util';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   providers: [VirtualScrollService, ColumnChooserService, ToolbarService, FreezeService, FilterService, SortService,
-    RowDDService, SelectionService, EditService, ContextMenuService, PageService, InfiniteScrollService]
+    RowDDService, SelectionService, EditService, ContextMenuService, PageService, InfiniteScrollService,AggregateService]
 })
 export class AppComponent implements OnInit, AfterViewInit, OnChanges {
   colForm = this.fb.group({
@@ -40,7 +40,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     return this.rowForm
   }
   constructor(private fb: FormBuilder, private gridService: GridService) { }
-
   @ViewChild('grid') grid!: TreeGrid;
   newColName!: any
   hideDialog: any = () => {
@@ -48,7 +47,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
   }
   columns = COLUMNS
   columnsCopy = [...this.columns]
-  data: any[] | undefined;
+  data!: any[];
   toolbar: string[] | undefined;
   infiniteScrollSettings!: Object;
   selectOptions!: Object;
@@ -61,6 +60,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
   contextMenuItems!: any[];
   dataCopy!: any
   show!: boolean
+  dummyData: any
   @ViewChild('ejDialog') ejDialog!: DialogComponent;
   @ViewChild('chooseDialog') chooseDialog!: DialogComponent;
   @ViewChild('columnDialog') columnDialog!: DialogComponent;
@@ -112,10 +112,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
         'font-size': ''
       }
     };
-
-
-
-
   }
   contextMenuOpen(args: any): void {
     this.rowIndex = args.rowInfo.rowIndex;
@@ -135,7 +131,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
       }
     })
   }
-
   private onEditCol(args: any) {
     this.columnDialog.show()
     this.colField = args.column.field
@@ -143,9 +138,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     this.textAlign = args.column.textAlign.toLowerCase()
     this.dataType = args.column.type
   }
-
   private onSortCol(args: any) {
-    // let checked = this.onClickCheckBox(args)
     this.sort = args.event.target.checked
   }
   private onDelCol(args: any) {
@@ -155,19 +148,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     this.grid.columns.splice(columnIndex, 1);
     this.grid.refreshColumns();
   }
-
-  // Not Working
   onFreezeCol(args: any) {
-    console.log(args.column.index);
-
     const isChecked = args.event.target.checked
     this.v = !isChecked
     this.scroll = isChecked;
     this.number = isChecked ? args.column.index + 1 : 0;
     this.checked = isChecked
   }
-
-
   contextMenuClick(args?: any): void {
     const isChecked = Boolean(args.event.target.checked);
     switch (args.item.id) {
@@ -175,7 +162,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
         return this.onEditCol(args);
       }
       case 'sorting': {
-
         return this.onSortCol(args);
       }
       case 'newCol': {
@@ -189,15 +175,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
         this.chooseDialog.show()
         break;
       }
-      // Not Working
       case 'freezeCol': {
         return this.onFreezeCol(args);
       }
       case 'filter': {
-        // let checked = this.onClickCheckBox(args)
         this.show = isChecked
         return;
-
       }
       case 'addNext': {
         this.addRowDialog.show()
@@ -267,7 +250,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
 
   }
   ngOnChanges() {
-
   }
   ngAfterViewInit() {
     TreeGrid.prototype.getRowByIndex = getRowByIndex.bind(this)
@@ -278,12 +260,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     }
     console.log(this.grid);
     setTimeout(() => {
-      (this.grid.rowDragAndDropModule as any).__proto__.dropRows = this.dropRows.bind(this);
+      (this.grid.rowDragAndDropModule as any).__proto__.dropRows = dropRows.bind(this);
     }, 200)
-
-
   }
-
   onDragandDrop(event: any) {
     let isChecked = event.target.checked
     this.allowDragandDrop = isChecked
@@ -291,191 +270,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     this.scroll = isChecked;
     // (this.grid.rowDragAndDropModule as any).__proto__.dropRows = this.dropRows.bind(this);
   }
-
-  dropRows(this: any, args: any, isByMethod: any) {
-    console.log(args);
-    const grid = this.grid;
-    const thisRow = this.grid.rowDragAndDropModule;
-
-    function isRemoteData() {
-      if (grid.dataSource instanceof DataManager) {
-        const adaptor = grid.dataSource.adaptor;
-        return (adaptor instanceof ODataAdaptor ||
-          (adaptor instanceof WebApiAdaptor) || (adaptor instanceof WebMethodAdaptor) ||
-          (adaptor instanceof CacheAdaptor) || adaptor instanceof UrlAdaptor);
-      }
-      return false;
-    }
-    thisRow.dropPosition = thisRow.dropPosition || 'bottomSegment';
-    if (thisRow.dropPosition !== 'Invalid' && !isRemoteData()) {
-      const tObj = grid;
-      let draggedRecord: any;
-      let droppedRecord;
-      if (isNullOrUndefined(args.dropIndex)) {
-        const rowIndex = tObj.getSelectedRowIndexes()[0] - 1;
-        const record = tObj.getCurrentViewRecords()[rowIndex];
-        thisRow.getParentData(record);
-      }
-      else {
-        const row = args.target.parentElement.children[1] || args.target.parentElement.parentElement.children[1];
-        // args.dropIndex = args.dropIndex === args.fromIndex ? thisRow.getTargetIdx(args.target.parentElement) : args.dropIndex;
-        args.dropIndex = parseInt(row?.innerText || '0');
-        thisRow.droppedRecord = tObj.getCurrentViewRecords().find((e: any) => e.TaskID === args.dropIndex);
-        thisRow.draggedRecord
-      }
-      let dragRecords = [];
-      droppedRecord = thisRow.droppedRecord;
-      if (!args.data[0]) {
-        dragRecords.push(args.data);
-      }
-      else {
-        dragRecords = args.data;
-      }
-      let count = 0;
-      const multiplegrid = grid.rowDropSettings.targetID;
-      thisRow.isMultipleGrid = multiplegrid;
-      if (!multiplegrid) {
-        thisRow.ensuredropPosition(dragRecords, droppedRecord);
-      }
-      else {
-        thisRow.isaddtoBottom = multiplegrid && thisRow.isDraggedWithChild;
-      }
-      const dragLength = dragRecords.length;
-      if (!isNullOrUndefined(grid.idMapping)) {
-        dragRecords.reverse();
-      }
-      for (let i = 0; i < dragLength; i++) {
-        draggedRecord = dragRecords[i];
-        thisRow.draggedRecord = draggedRecord;
-        if (thisRow.dropPosition !== 'Invalid') {
-          if (!tObj.rowDropSettings.targetID || isByMethod) {
-            tObj.flatData.splice(args.fromIndex, 1);
-            thisRow.treeGridData = tObj.flatData;
-          }
-          if (thisRow.draggedRecord === thisRow.droppedRecord) {
-            let correctIndex = thisRow.getTargetIdx(args.target.offsetParent.parentElement);
-            if (isNaN(correctIndex)) {
-              correctIndex = thisRow.getTargetIdx(args.target.parentElement);
-            }
-            args.dropIndex = correctIndex;
-            droppedRecord = thisRow.droppedRecord = grid.getCurrentViewRecords()[args.dropIndex];
-          }
-          if (droppedRecord?.parentItem || thisRow.dropPosition === 'middleSegment') {
-            const parentRecords = tObj.parentData;
-            // const newParentIndex = parentRecords.indexOf(thisRow.draggedRecord);
-            const newParentIndex = thisRow.draggedRecord.parentItem?.index || thisRow.draggedRecord.index
-            if (newParentIndex !== -1) {
-              parentRecords.splice(newParentIndex, 1);
-            }
-          }
-          const recordIndex1 = thisRow.treeGridData.indexOf(droppedRecord);
-          thisRow.dropAtTop(recordIndex1);
-          console.log(thisRow.dropPosition);
-
-          if (thisRow.dropPosition === 'bottomSegment') {
-            if (!droppedRecord.hasChildRecords) {
-              if (grid.parentIdMapping) {
-                thisRow.treeData.splice(recordIndex1 + 1, 0, thisRow.draggedRecord.taskData);
-              }
-              thisRow.treeGridData.splice(recordIndex1 + 1, 0, thisRow.draggedRecord);
-            }
-            else {
-              count = thisRow.getChildCount(droppedRecord, 0);
-              if (grid.parentIdMapping) {
-                thisRow.treeData.splice(recordIndex1 + count + 1, 0, thisRow.draggedRecord.taskData);
-              }
-              thisRow.treeGridData.splice(recordIndex1 + count + 1, 0, thisRow.draggedRecord);
-            }
-            if (isNullOrUndefined(droppedRecord.parentItem)) {
-              delete draggedRecord.parentItem;
-              draggedRecord.level = 0;
-              if (grid.parentIdMapping) {
-                draggedRecord[grid.parentIdMapping] = null;
-              }
-            }
-            if (droppedRecord.parentItem) {
-              const rec = thisRow.getChildrecordsByParentID(droppedRecord.parentUniqueID);
-              const childRecords = rec[0].childRecords;
-              const droppedRecordIndex = childRecords.indexOf(droppedRecord) + 1;
-              childRecords.splice(droppedRecordIndex, 0, draggedRecord);
-              draggedRecord.parentItem = droppedRecord.parentItem;
-              draggedRecord.parentUniqueID = droppedRecord.parentUniqueID;
-              if (grid.parentIdMapping) {
-                draggedRecord[grid.parentIdMapping] = droppedRecord[grid.parentIdMapping];
-                draggedRecord.parentItem = droppedRecord.parentItem;
-                draggedRecord.level = droppedRecord.level;
-              }
-            }
-            if (draggedRecord.hasChildRecords) {
-              const level = 1;
-              thisRow.updateChildRecordLevel(draggedRecord, level);
-              thisRow.updateChildRecord(draggedRecord, recordIndex1 + count + 1);
-            }
-          }
-          thisRow.dropMiddle(recordIndex1);
-        }
-        if (isNullOrUndefined(draggedRecord.parentItem)) {
-          const parentRecords = tObj.parentData;
-          // const newParentIndex = parentRecords.indexOf(thisRow.droppedRecord);
-          const newParentIndex = thisRow.draggedRecord.parentItem?.index || thisRow.draggedRecord.index
-
-          let nonRepeat = 0;
-          parentRecords.filter((e: any) => {
-            if (draggedRecord.uniqueID === e.uniqueID) {
-              nonRepeat++;
-            }
-          });
-          if (thisRow.dropPosition === 'bottomSegment' && nonRepeat === 0) {
-            parentRecords.splice(newParentIndex + 1, 0, draggedRecord);
-          }
-          else if (thisRow.dropPosition === 'topSegment' && nonRepeat === 0) {
-            parentRecords.splice(newParentIndex, 0, draggedRecord);
-          }
-        }
-        tObj.rowDragAndDropModule.refreshGridDataSource();
-      }
-    }
-
-  }
-
-
-
-
-
-
-
-  onScroll(event: any) {
-    console.log(event);
-
-  }
   onDrag(event: any) {
-    // this.v = false;
-    // this.scroll=true
-    // console.log(event.originalEvent.event.preventDefault());
-    // var a = event.data[0].index;
-    //  var b = this.obj2;
-    //  this.obj1 = b;
-    //  this.obj2 = a;
+
   }
-  // onDragStart(event: any) {
-  //   this.v = false;
-  //   // console.log(event.originalEvent);
-  //   // var a = event.data[0].index;
-  //   //  var b = this.obj2;
-  //   //  this.obj1 = b;
-  //   //  this.obj2 = a;
-  // }
-  // onDrop(event:any){
-  //   // console.log(event);
-  //   // var a = this.grid.flatData[event.fromIndex]
-  //   //  var b = this.grid.flatData[event.dropIndex]
-  //   //  this.grid.flatData[event.fromIndex]= b;
-  //   //  this.grid.flatData[event.dropIndex]= a;
-  //   // this.grid.refreshColumns()
-  // }
-  // onClickCheckBox(args: any) {
-  //   return args.event.target.children[0].checked = !args.event.target.children[0].checked
-  // }
+  onDrop(event: any) {
+  }
   copyRow(args: any) {
     let row = args.rowInfo.row
     row.style.background = 'pink';
@@ -509,8 +308,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
         this.TMID.checked = state; break;
     }
   }
-
-  // Multi sorting No working
   onClick(event: any, ele?: any) {
     const { checked, value } = ele;
     if (checked) {
@@ -520,57 +317,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
   onEditColumn() {
-    let colObj = this.form.value
-    this.grid.columns.map((e: any) => {
-      if (e.field == this.colField) {
-        if (colObj.name) {
-          e.headerText = colObj.name;
-        }
-        if (colObj.alignment) {
-          e.textAlign = colObj.alignment
-        }
-        this.customAttributes.style.background = colObj.bgColor;
-        this.customAttributes.style.color = colObj.fontColor;
-        this.customAttributes.style['font-size'] = colObj.size + 'px'
-        e.customAttributes = this.customAttributes
-        switch (colObj.type) {
-          case 'string': {
-            this.grid.flatData.map((data: any) => {
-              data[this.colField] = String(data[this.colField]) || "none"
-            })
-            break;
-          }
-          case 'number': {
-            this.grid.flatData.map((data: any) => {
-              data[this.colField] = parseInt(data[this.colField]) || 0;
-            })
-            break;
-          }
-          case 'date': {
-            this.grid.flatData.map((data: any) => {
-              data[this.colField] = new Date(9, 11, 24)
-            })
-            break;
-          }
-          case 'boolean': {
-            this.grid.flatData.map((data: any) => {
-              data[this.colField] = true
-            })
-            break;
-          }
-        }
-
-        this.grid.refreshColumns();
-        this.columnDialog.hide()
-        this.customAttributes = {
-          style: {
-            background: '',
-            color: '',
-            'font-size': ''
-          }
-        };
+    const { grid, form, customAttributes, colField, columnDialog } = this;
+    this.gridService.editColumn({ grid, form, customAttributes, colField, columnDialog })
+    this.customAttributes = {
+      style: {
+        background: '',
+        color: '',
+        'font-size': ''
       }
-    })
+    };
   }
   onCreateColumn() {
     this.gridService.createColumn(this.grid, this.ejDialog, this.columnsCopy)
@@ -585,17 +340,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
     const { grid, columnsCopy } = this;
     this.gridService.chooseColumn(event, { grid, columnsCopy });
   }
+  pushRow(index: number) {
+    (this.grid.flatData[index] as any)?.taskData.Crew?.push(this.rowForm.value);
+  }
+  dropIndex!: number
   onAddRow() {
-    const rowModule = (this.grid.rowDragAndDropModule as any);
     if (this.addChildIndex >= 0 && this.addChild) {
-      (this.grid.flatData[this.addChildIndex] as any)?.Crew?.push(this.rowForm.value);
-        this.grid.refresh();
+      this.pushRow(this.addChildIndex)
+      this.grid.refresh()
       this.addRowDialog.hide()
       this.rowForm.reset()
     }
     else if (this.row >= 0 && this.addChild) {
-      console.log(this.addChild);
-      (this.grid.flatData[this.addChildIndex] as any).Crew?.push(this.rowForm.value)
+      (this.grid.flatData[this.row] as any).Crew?.push(this.rowForm.value)
       this.grid.refresh()
       this.addRowDialog.hide()
       this.rowForm.reset()
@@ -607,8 +364,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnChanges {
       this.rowForm.reset()
     }
   }
-
   onCancelRow() {
     this.gridService.cancelDialog(this.addRowDialog)
   }
+
+
 }
